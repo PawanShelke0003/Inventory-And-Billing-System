@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Staff Dashboard | Inventory System</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+        margin: 0;
+        background-color: #f5f7fb;
+        font-family: "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Top bar */
+    .topbar {
+        background-color: #1f2937;
+        color: #ffffff;
+        padding: 14px 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .topbar-title {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    /* Page container */
+    .page-container {
+        padding: 25px;
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    /* Section title */
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 15px;
+    }
+
+    /* Action cards */
+    .action-card {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+        text-align: center;
+        height: 100%;
+    }
+
+    .action-card i {
+        font-size: 28px;
+        color: #2563eb;
+        margin-bottom: 10px;
+    }
+
+    .action-card h6 {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .action-card p {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 12px;
+    }
+
+    /* ERP card */
+    .erp-card {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 22px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+
+    /* Low stock alert */
+    .low-stock-box {
+        background-color: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-radius: 8px;
+        padding: 18px;
+        margin-bottom: 25px;
+    }
+
+    .low-stock-box h6 {
+        font-weight: 700;
+        color: #9a3412;
+        margin-bottom: 10px;
+    }
+
+    .low-stock-box ul {
+        padding-left: 18px;
+        margin-bottom: 0;
+    }
+
+    /* Table */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        min-width: 800px;
+    }
+
+    table th,
+    table td {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    table th {
+        background-color: #f1f5f9;
+        font-weight: 600;
+    }
+
+    .action-btn {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-title">Inventory Billing System</div>
+
+  <form th:action="@{/logout}" method="post">
+    <button class="btn btn-outline-light btn-sm">
+      <i class="bi bi-box-arrow-right"></i> Logout
+    </button>
+  </form>
+</div>
+
+<div class="page-container">
+
+  <!-- DASHBOARD TITLE -->
+  <div class="section-title">Staff Dashboard</div>
+
+  <!-- ACTIONS -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="action-card">
+        <i class="bi bi-receipt"></i>
+        <h6>Create New Bill</h6>
+        <p>Generate a new customer invoice</p>
+        <a th:href="@{/staff/billing}" class="btn btn-success btn-sm">
+          Create Bill
+        </a>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="action-card">
+        <i class="bi bi-clock-history"></i>
+        <h6>Billing History</h6>
+        <p>View previously generated bills</p>
+        <a th:href="@{/staff/billing/history}" class="btn btn-primary btn-sm">
+          View History
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOW STOCK ALERT -->
+  <div th:if="${lowStockProducts.size() > 0}" class="low-stock-box">
+    <h6><i class="bi bi-exclamation-triangle"></i> Low Stock Warning</h6>
+    <ul>
+      <li th:each="p : ${lowStockProducts}">
+        <span th:text="${p.name}"></span> —
+        Remaining:
+        <strong th:text="${p.quantity}"></strong>
+      </li>
+    </ul>
+  </div>
+
+  <!-- RECENT BILLS -->
+  <div class="erp-card">
+    <h6 class="mb-3 fw-semibold">Recent Bills</h6>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover table-sm">
+        <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Date & Time</th>
+          <th>Total Amount</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="b, stat : ${recentBills}">
+          <td th:text="${stat.index + 1}"></td>
+          <td th:text="${#temporals.format(b.billDate,'dd-MM-yyyy hh:mm a')}"></td>
+          <td th:text="${b.grandTotal}"></td>
+          <td>
+            <a th:href="@{/staff/billing/view/{id}(id=${b.id})}"
+               class="btn btn-outline-primary btn-sm action-btn">
+              View
+            </a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

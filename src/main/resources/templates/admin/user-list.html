@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management | Inventory System</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            background-color: #f5f7fb;
+            font-family: "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* Page container */
+        .page-container {
+            padding: 25px;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ERP card */
+        .erp-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 22px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+        }
+
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 800px;
+        }
+
+        table th,
+        table td {
+            text-align: center;
+            vertical-align: middle;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        table th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        /* Status badges */
+        .badge-active {
+            background-color: #dcfce7;
+            color: #166534;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .badge-inactive {
+            background-color: #fee2e2;
+            color: #991b1b;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        /* Action button */
+        .action-btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page-container">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div>
+            <div class="page-title">User Management</div>
+            <div class="page-subtitle">
+                System Access Control & Role Assignment
+            </div>
+        </div>
+
+        <!-- HEADER ACTIONS -->
+        <div class="header-actions">
+            <a th:href="@{/admin/dashboard}"
+               class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+
+            <a class="btn btn-success btn-sm"
+               th:href="@{/admin/users/add}">
+                <i class="bi bi-plus-lg"></i> Add User
+            </a>
+        </div>
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="erp-card">
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-sm">
+                <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="u : ${users}">
+                    <td th:text="${u.username}"></td>
+                    <td th:text="${u.role}"></td>
+
+                    <!-- STATUS -->
+                    <td>
+                        <span th:if="${u.active}" class="badge-active">
+                            Active
+                        </span>
+                        <span th:unless="${u.active}" class="badge-inactive">
+                            Inactive
+                        </span>
+                    </td>
+
+                    <!-- ACTION -->
+                    <td>
+                        <a th:href="@{/admin/users/toggle/{id}(id=${u.id})}"
+                           class="btn btn-warning btn-sm action-btn">
+                            Toggle Status
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

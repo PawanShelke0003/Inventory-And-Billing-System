@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Error | Inventory System</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+        min-height: 100vh;
+        background-color: #f5f7fb;
+        font-family: "Segoe UI", Roboto, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Error card */
+    .error-card {
+        max-width: 520px;
+        width: 100%;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    .error-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .error-icon {
+        font-size: 26px;
+        color: #dc2626;
+    }
+
+    .error-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .error-body {
+        padding: 22px;
+    }
+
+    .error-message {
+        font-size: 14px;
+        color: #374151;
+        margin-bottom: 20px;
+    }
+
+    /* Actions */
+    .error-actions {
+        display: flex;
+        gap: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="error-card">
+
+  <!-- HEADER -->
+  <div class="error-header">
+    <i class="bi bi-exclamation-triangle-fill error-icon"></i>
+    <h4 class="error-title" th:text="${errorTitle}">
+      Something went wrong
+    </h4>
+  </div>
+
+  <!-- BODY -->
+  <div class="error-body">
+    <p class="error-message" th:text="${errorMessage}">
+      An unexpected error occurred while processing your request.
+    </p>
+
+    <div class="error-actions">
+      <a href="javascript:history.back()"
+         class="btn btn-outline-secondary btn-sm">
+        Go Back
+      </a>
+
+      <a th:href="@{/admin/dashboard}"
+         class="btn btn-primary btn-sm">
+        Go to Dashboard
+      </a>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+package com.example.demo.Service;
+
+import com.example.demo.Models.Bill;
+import com.example.demo.Models.BillItem;
+import com.example.demo.Models.Customer;
+import com.example.demo.Models.User;
+
+import java.util.List;
+
+public interface BillingService {
+
+    Bill createBill(Customer customer, User staff, List<BillItem>items);
+    List<Bill>getBillByStaff(User staff);
+    Bill getBillById(Long id);
+    List<Bill>getRecentBills(User user);
+    List<Bill>getAllBills();
+}

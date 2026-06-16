@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Bill Receipt</title>
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+  <style>
+    .receipt {
+      max-width: 800px;
+      margin: auto;
+      border: 1px solid #ddd;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="receipt mt-4">
+
+  <h4 class="text-center">INVOICE</h4>
+  <hr>
+
+  <p>
+    <b>Bill ID:</b> <span th:text="${bill.id}"></span><br>
+    <b>Date:</b>
+    <span th:text="${#temporals.format(bill.billDate,'dd-MM-yyyy HH:mm')}"></span>
+  </p>
+
+  <p>
+    <b>Customer:</b> <span th:text="${bill.customer.name}"></span><br>
+    <b>Phone:</b> <span th:text="${bill.customer.phone}"></span>
+  </p>
+
+  <table class="table table-bordered">
+    <thead class="table-secondary">
+    <tr>
+      <th>Product</th>
+      <th>Price</th>
+      <th>Qty</th>
+      <th>Total</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="i : ${items}">
+      <td th:text="${i.product.name}"></td>
+      <td th:text="${i.price}"></td>
+      <td th:text="${i.quantity}"></td>
+      <td th:text="${i.total}"></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div class="text-end">
+    <p>Subtotal: <b th:text="${bill.totalAmount}"></b></p>
+    <p>GST (18%): <b th:text="${bill.gstAmount}"></b></p>
+    <h5>Grand Total: <b th:text="${bill.grandTotal}"></b></h5>
+  </div>
+
+  <div class="text-center mt-3">
+    <button onclick="window.print()" class="btn btn-secondary">
+      Print
+    </button>
+    <a th:href="@{/staff/dashboard}" class="btn btn-primary">
+      Back
+    </a>
+  </div>
+
+</div>
+
+</body>
+</html>

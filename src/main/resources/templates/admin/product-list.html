@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Products | Inventory System</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+        margin: 0;
+        background-color: #f5f7fb;
+        font-family: "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Page container */
+    .page-container {
+        padding: 25px;
+    }
+
+    /* Header */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .page-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    /* Card */
+    .erp-card {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 22px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+
+    /* Table */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 900px;
+        width: 100%;
+    }
+
+    table th,
+    table td {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    table th {
+        background-color: #f1f5f9;
+        font-weight: 600;
+    }
+
+    /* Status badges */
+    .badge-active {
+        background-color: #dcfce7;
+        color: #166534;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 12px;
+    }
+
+    .badge-inactive {
+        background-color: #fee2e2;
+        color: #991b1b;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 12px;
+    }
+
+    /* Action buttons */
+    .action-btn {
+        padding: 4px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    /* Footer action */
+    .footer-action {
+        margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="page-container">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="page-title">Product Master</div>
+
+    <a th:href="@{/admin/products/add}" class="btn btn-success btn-sm">
+      <i class="bi bi-plus-lg"></i> Add Product
+    </a>
+  </div>
+
+  <!-- TABLE CARD -->
+  <div class="erp-card">
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover table-sm">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Product Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${products}">
+          <td th:text="${p.id}"></td>
+          <td th:text="${p.name}"></td>
+          <td th:text="${p.category.name}"></td>
+          <td th:text="${p.price}"></td>
+          <td th:text="${p.quantity}"></td>
+
+          <!-- STATUS -->
+          <td>
+            <span th:if="${p.active}" class="badge-active">Active</span>
+            <span th:unless="${p.active}" class="badge-inactive">Inactive</span>
+          </td>
+
+          <!-- ACTIONS -->
+          <td>
+            <a th:href="@{/admin/products/toggle/{id}(id=${p.id})}"
+               class="btn btn-warning btn-sm action-btn">
+              Toggle
+            </a>
+
+            <a th:href="@{/admin/products/stock/{id}(id=${p.id})}"
+               class="btn btn-info btn-sm action-btn">
+              Stock
+            </a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-action">
+    <a th:href="@{/admin/dashboard}" class="btn btn-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+  </div>
+
+</div>
+
+</body>
+</html>
