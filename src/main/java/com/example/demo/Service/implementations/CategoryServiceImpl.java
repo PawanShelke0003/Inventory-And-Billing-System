@@ -1,14 +1,15 @@
-package com.example.demo.Service;
+package com.example.demo.Service.implementations;
 
 import com.example.demo.Models.Category;
 import com.example.demo.Repository.CategoryRepository;
+import com.example.demo.Service.interfaces.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 @Service
 @RequiredArgsConstructor
-public class CategoryServiceImpl implements CategoryService{
+public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository repository;
 

@@ -29,7 +29,8 @@ public class SecurityConfig {
                                 auth.requestMatchers("/login","/css/**")
                                         .permitAll()
                                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                                        .requestMatchers("/staff/**").hasRole("STAFF")
+                                        .requestMatchers("/staff/**").hasAnyRole("STAFF")
+
                                         .anyRequest().authenticated()
 
 

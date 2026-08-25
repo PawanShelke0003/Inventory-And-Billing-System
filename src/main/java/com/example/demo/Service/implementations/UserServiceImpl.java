@@ -1,7 +1,8 @@
-package com.example.demo.Service;
+package com.example.demo.Service.implementations;
 
 import com.example.demo.Models.User;
 import com.example.demo.Repository.UserRepository;
+import com.example.demo.Service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
     @Override

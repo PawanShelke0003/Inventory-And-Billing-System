@@ -1,7 +1,7 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Models.Category;
-import com.example.demo.Service.CategoryService;
+import com.example.demo.Service.interfaces.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

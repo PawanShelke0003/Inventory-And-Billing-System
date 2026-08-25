@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: admin_layout('View Bill', ~{::content})}" th:with="activeMenu='dashboard'">
+<body>
+<div th:fragment="content">
+    
+    <div class="page-header">
+        <div>
+            <div class="page-title">Invoice Details</div>
+            <div class="page-subtitle">View and print bill record</div>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-secondary action-btn"><i class="bi bi-printer"></i> Print</button>
+            <a th:href="@{/admin/dashboard}" class="btn btn-primary action-btn"><i class="bi bi-arrow-left"></i> Back</a>
+        </div>
+    </div>
+
+    <div class="form-container" style="max-width: 800px; margin: 0 auto;">
+        <h4 class="text-center" style="font-weight: 700; color: #111827; margin-bottom: 20px;">INVOICE</h4>
+        <hr style="border-color: #e5e7eb; margin-bottom: 20px;">
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+            <div>
+                <p style="margin-bottom: 5px;"><b>Bill ID:</b> <span th:text="${bill.id}"></span></p>
+                <p style="margin-bottom: 5px;"><b>Date:</b> <span th:text="${#temporals.format(bill.billDate,'dd-MM-yyyy hh:mm a')}"></span></p>
+                <p style="margin-bottom: 5px;"><b>Staff:</b> <span th:text="${bill.createdBy.username}"></span></p>
+            </div>
+            <div style="text-align: right;">
+                <p style="margin-bottom: 5px;"><b>Customer:</b> <span th:text="${bill.customer.name}"></span></p>
+                <p style="margin-bottom: 5px;"><b>Phone:</b> <span th:text="${bill.customer.phone}"></span></p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th style="text-align: right;">Total</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="i : ${items}">
+                    <td th:text="${i.product.name}" style="font-weight: 600;"></td>
+                    <td th:text="${i.price}"></td>
+                    <td th:text="${i.quantity}"></td>
+                    <td th:text="${i.total}" style="text-align: right;"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: right; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <p style="margin-bottom: 5px; color: #6b7280;">Subtotal: <b style="color: #111827;" th:text="${bill.totalAmount}"></b></p>
+            <p style="margin-bottom: 5px; color: #6b7280;">GST (18%): <b style="color: #111827;" th:text="${bill.gstAmount}"></b></p>
+            <h4 style="margin-top: 10px; color: #10b981; font-weight: 700;">Grand Total: ₹<span th:text="${bill.grandTotal}"></span></h4>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

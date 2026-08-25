@@ -1,10 +1,10 @@
-package com.example.demo.Service;
+package com.example.demo.Service.implementations;
 
-import ch.qos.logback.classic.spi.IThrowableProxy;
 import com.example.demo.Models.Category;
 import com.example.demo.Models.Product;
 import com.example.demo.Repository.CategoryRepository;
 import com.example.demo.Repository.ProductRepository;
+import com.example.demo.Service.interfaces.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ProductServiceImpl implements ProductService{
+public class ProductServiceImpl implements ProductService {
 
   private final ProductRepository repository;
   private final CategoryRepository categoryRepository;
