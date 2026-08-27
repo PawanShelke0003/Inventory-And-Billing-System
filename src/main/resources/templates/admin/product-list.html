@@ -44,9 +44,13 @@
 
           <!-- ACTIONS -->
           <td>
-            <a th:href="@{/admin/products/toggle/{id}(id=${p.id})}"
-               class="btn btn-warning btn-sm action-btn">
-              Toggle
+            <a th:if="${p.active}" th:href="@{/admin/products/toggle/{id}(id=${p.id})}"
+               class="action-btn btn-danger-light">
+              Deactivate
+            </a>
+            <a th:unless="${p.active}" th:href="@{/admin/products/toggle/{id}(id=${p.id})}"
+               class="action-btn" style="background-color: #dcfce7; color: #166534;">
+              Activate
             </a>
 
             <a th:href="@{/admin/products/stock/{id}(id=${p.id})}"

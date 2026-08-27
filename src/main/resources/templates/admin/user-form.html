@@ -54,7 +54,7 @@
                         <option value="">Select role</option>
                         <option th:each="r : ${roles}"
                                 th:value="${r}"
-                                th:text="${r}">
+                                th:text="${r.name() == 'ROLE_ADMIN' ? 'Manager' : (r.name() == 'ROLE_STAFF' ? 'Staff' : r.name())}">
                         </option>
                     </select>
                     <div class="form-text">

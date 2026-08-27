@@ -43,7 +43,7 @@
                 <tbody>
                 <tr th:each="u : ${users}">
                     <td th:text="${u.username}"></td>
-                    <td th:text="${u.role}"></td>
+                    <td th:text="${u.role.name() == 'ROLE_ADMIN' ? 'Manager' : (u.role.name() == 'ROLE_STAFF' ? 'Staff' : u.role.name())}"></td>
 
                     <!-- STATUS -->
                     <td>
@@ -57,9 +57,13 @@
 
                     <!-- ACTION -->
                     <td>
-                        <a th:href="@{/admin/users/toggle/{id}(id=${u.id})}"
-                           class="btn btn-warning btn-sm action-btn">
-                            Toggle Status
+                        <a th:if="${u.active}" th:href="@{/admin/users/toggle/{id}(id=${u.id})}"
+                           class="action-btn btn-danger-light">
+                            Deactivate
+                        </a>
+                        <a th:unless="${u.active}" th:href="@{/admin/users/toggle/{id}(id=${u.id})}"
+                           class="action-btn" style="background-color: #dcfce7; color: #166534;">
+                            Activate
                         </a>
                     </td>
                 </tr>

@@ -8,9 +8,9 @@
         <div class="stat-card">
             <div class="stat-info">
                 <small>Total Revenue</small>
-                <h2 th:text="${totalRevenue != null ? totalRevenue : '0.00'}">0.00</h2>
+                <h2>₹ <span th:text="${totalRevenue != null ? totalRevenue : '0.00'}">0.00</span></h2>
             </div>
-            <div class="stat-icon icon-green"><i class="bi bi-currency-dollar"></i></div>
+            <div class="stat-icon icon-green"><i class="bi bi-currency-rupee"></i></div>
         </div>
         
         <div class="stat-card">
@@ -60,7 +60,7 @@
                     <td th:text="${#temporals.format(b.billDate,'dd-MM-yyyy hh:mm a')}">Date</td>
                     <td th:text="${b.customer.name}" style="font-weight: 600;">Customer</td>
                     <td th:text="${b.createdBy.username}">Staff</td>
-                    <td th:text="${b.grandTotal}" class="amt-text">0.00</td>
+                    <td class="amt-text">₹ <span th:text="${b.grandTotal}"></span></td>
                     <td>
                         <a th:href="@{/admin/billing/view/{id}(id=${b.id})}" class="action-btn">View</a>
                     </td>
