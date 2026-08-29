@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Models.Category;
 import com.example.demo.Models.Product;
 import com.example.demo.Service.interfaces.CategoryService;
 import com.example.demo.Service.interfaces.ProductService;
@@ -63,6 +64,12 @@ public class AdminProductController {
     public String stockPage(Model model){
         model.addAttribute("products",productService.getAllProducts());
         return "admin/stock";
+    }
+    @GetMapping("/edit/{id}")
+    public String editProduct(@PathVariable Long id,Model model){
+        model.addAttribute("product",productService.getProductById(id));
+        model.addAttribute("categories",categoryService.getAllCategories());
+        return "admin/product-form";
     }
 
 

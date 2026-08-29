@@ -14,8 +14,15 @@ public class AuthController {
 @GetMapping("/redirect")
     public String redirectAfterLogin(Authentication auth){
 
+    if(auth.getAuthorities().stream()
+            .anyMatch(a->
+                    a.getAuthority().equals("ROLE_OWNER"))){
+        return "redirect:/owner/dashboard";
+    }
+
         if(auth.getAuthorities().stream()
-                .anyMatch(a->a.getAuthority().equals("ROLE_ADMIN"))){
+                .anyMatch(a->
+                        a.getAuthority().equals("ROLE_MANAGER"))){
             return "redirect:/admin/dashboard";
         }
         return "redirect:/staff/dashboard";

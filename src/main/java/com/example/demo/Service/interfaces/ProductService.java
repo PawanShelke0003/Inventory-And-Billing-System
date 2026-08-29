@@ -13,5 +13,6 @@ public interface ProductService {
     void updateStock(Long productId,Integer quantity);
     Product getProductById(Long id);
     List<Product>getLowStockProducts();
+    List<Product>getActiveProductsByCategory(Long categoryId);
 
 }

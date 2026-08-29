@@ -12,4 +12,5 @@ public interface UserService {
     void toggleUserStatus(Long userId);
     User findByUsername(String name);
     List<User>getUserByActiveStatus();
+    User getUserById(Long id);
 }

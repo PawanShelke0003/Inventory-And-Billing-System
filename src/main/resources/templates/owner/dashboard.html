@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: admin_layout('Owner Dashboard', ~{::content})}" th:with="activeMenu='dashboard'">
+<body>
+<div th:fragment="content">
+    <div class="page-header">
+        <div class="page-title">Owner Dashboard</div>
+        <div class="page-subtitle">
+            Strategic Business Intelligence & Reporting
+        </div>
+    </div>
+
+    <!-- We will add the heavy analytics cards here later! -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card p-5 text-center" style="border: 2px dashed #cbd5e1; background-color: #f8fafc; border-radius: 8px;">
+                <h4 class="text-secondary"><i class="bi bi-bar-chart-fill mb-2" style="font-size: 2rem;"></i><br>Business Analytics Coming Soon</h4>
+                <p class="text-secondary mt-2">This dedicated space is reserved for macro-level financials, inventory valuation, and security audit logs.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

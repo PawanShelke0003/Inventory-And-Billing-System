@@ -5,6 +5,7 @@ import com.example.demo.Models.BillItem;
 import com.example.demo.Models.Customer;
 import com.example.demo.Models.User;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface BillingService {
@@ -14,4 +15,6 @@ public interface BillingService {
     Bill getBillById(Long id);
     List<Bill>getRecentBills(User user);
     List<Bill>getAllBills();
+    long getTodaysBillCount(User staff);
+    BigDecimal getTodaysSales(User staff);
 }

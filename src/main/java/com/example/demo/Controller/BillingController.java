@@ -26,9 +26,12 @@ public class BillingController {
     private final CustomerService customerService;
     private final BillingService billingService;
     private final UserService userService;
-@GetMapping
-    public String billingForm(Model  model){
+    private final com.example.demo.Service.interfaces.CategoryService categoryService;
+
+    @GetMapping
+    public String billingForm(Model model){
         model.addAttribute("products",productService.getActiveProduct());
+        model.addAttribute("categories", categoryService.getAllCategories());
         return "staff/billing-form";
     }
 
@@ -42,6 +45,13 @@ public class BillingController {
 
         User staff = userService.findByUsername(principal.getName());
 
+        if(request.getItems() == null || request.getItems().isEmpty()){
+            model.addAttribute("errors","please select at least 1 product");
+            model.addAttribute("products",productService.getActiveProduct());
+            model.addAttribute("categories", categoryService.getAllCategories());
+            return "staff/billing-form";
+        }
+
         List<BillItem> items = request.getItems().stream()
                 .filter(i -> i.getQuantity() != null && i.getQuantity() > 0)
                 .map(i -> {
@@ -54,6 +64,7 @@ public class BillingController {
         if(items.isEmpty()){
             model.addAttribute("errors","please select at least 1 product");
             model.addAttribute("products",productService.getActiveProduct());
+            model.addAttribute("categories", categoryService.getAllCategories());
             return "staff/billing-form";
         }
         Bill bill = billingService.createBill(customer, staff, items);

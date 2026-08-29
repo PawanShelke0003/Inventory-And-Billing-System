@@ -44,6 +44,10 @@
 
           <!-- ACTIONS -->
           <td>
+            <a th:href="@{/admin/products/edit/{id}(id=${p.id})}"
+               class="action-btn">
+              <i class="bi bi-pencil"></i> Edit
+            </a>
             <a th:if="${p.active}" th:href="@{/admin/products/toggle/{id}(id=${p.id})}"
                class="action-btn btn-danger-light">
               Deactivate

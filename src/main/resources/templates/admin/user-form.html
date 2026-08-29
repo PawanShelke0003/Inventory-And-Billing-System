@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: admin_layout('Add User', ~{::content})}" th:with="activeMenu='users'">
+      th:replace="~{admin/layout :: admin_layout(${user.id == null ? 'Add User' : 'Edit User'}, ~{::content})}" th:with="activeMenu='users'">
 <body>
 <div th:fragment="content">
     <!-- HEADER -->
     <div class="page-header">
-        <div class="page-title">Create User</div>
+        <div class="page-title" th:text="${user.id == null ? 'Create User' : 'Edit User'}">Create User</div>
         <div class="page-subtitle">
             User Management → Assign system access and role
         </div>
@@ -15,14 +15,17 @@
     <div class="form-container">
 
         <form th:action="@{/admin/users/save}"
-              method="post">
+              method="post"
+              th:object="${user}">
+              
+            <input type="hidden" th:field="*{id}" />
 
             <!-- ROW 1 -->
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label">Username</label>
                     <input type="text"
-                           name="username"
+                           th:field="*{username}"
                            class="form-control"
                            placeholder="e.g. staff01"
                            required>
@@ -37,9 +40,10 @@
                            name="password"
                            class="form-control"
                            placeholder="Enter secure password"
-                           required>
+                           th:required="${user.id == null}">
                     <div class="form-text">
-                        Minimum 8 characters recommended
+                        <span th:if="${user.id == null}">Minimum 8 characters recommended</span>
+                        <span th:unless="${user.id == null}">Leave blank to keep existing password</span>
                     </div>
                 </div>
             </div>
@@ -48,13 +52,14 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label">Role</label>
-                    <select name="role"
+                    <select th:field="*{role}"
                             class="form-select"
                             required>
                         <option value="">Select role</option>
                         <option th:each="r : ${roles}"
                                 th:value="${r}"
-                                th:text="${r.name() == 'ROLE_ADMIN' ? 'Manager' : (r.name() == 'ROLE_STAFF' ? 'Staff' : r.name())}">
+                                th:text="${r.name() == 'ROLE_OWNER' ? 'Owner' : (r.name() == 'ROLE_MANAGER' ? 'Manager' : (r.name() == 'ROLE_STAFF' ? 'Staff' : r.name()))}"
+                                th:if="${isOwner or r.name() == 'ROLE_STAFF'}">
                         </option>
                     </select>
                     <div class="form-text">

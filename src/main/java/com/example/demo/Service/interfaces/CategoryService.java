@@ -9,5 +9,6 @@ public interface CategoryService {
     Category createCategory(Category category);
     List<Category>getAllCategories();
     void toggleCategoryStatus(Long id);
+    Category getCategoryById(Long id);
 
 }

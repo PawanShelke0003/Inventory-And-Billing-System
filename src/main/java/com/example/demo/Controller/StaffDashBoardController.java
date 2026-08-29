@@ -27,6 +27,8 @@ public class StaffDashBoardController {
         model.addAttribute("staff",staff);
         model.addAttribute("recentBills",
                 billingService.getBillByStaff(staff));
+        model.addAttribute("todaysBillCount",billingService.getTodaysBillCount(staff));
+        model.addAttribute("todaysSales",billingService.getTodaysSales(staff));
         model.addAttribute("lowStockProducts",productService.getLowStockProducts());
         return "staff/dashboard";
     }

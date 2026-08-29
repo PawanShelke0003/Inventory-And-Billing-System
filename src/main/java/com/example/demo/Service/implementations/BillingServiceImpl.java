@@ -99,4 +99,22 @@ public class BillingServiceImpl implements BillingService {
         return billRepo.findAllByOrderByBillDateDesc();
     }
 
+    @Override
+    public long getTodaysBillCount(User staff) {
+        java.time.LocalDate today = java.time.LocalDate.now();
+        return billRepo.findByCreatedByOrderByBillDateDesc(staff).
+                stream().filter(b->b.getBillDate()!=null&&b.getBillDate().toLocalDate().
+                        isEqual(today)).count();
+    }
+
+    @Override
+    public BigDecimal getTodaysSales(User staff) {
+        java.time.LocalDate today = java.time.LocalDate.now();
+
+        return billRepo.findByCreatedByOrderByBillDateDesc(staff).
+                stream().filter(b->b.getBillDate()!=null&&b.getBillDate().toLocalDate().
+                        isEqual(today)).map(Bill::getGrandTotal).
+                reduce(BigDecimal.ZERO,java.math.BigDecimal::add);
+    }
+
 }

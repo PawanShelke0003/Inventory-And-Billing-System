@@ -50,6 +50,10 @@
 
                     <!-- ACTION -->
                     <td>
+                        <a th:href="@{/admin/categories/edit/{id}(id=${cat.id})}"
+                           class="action-btn">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
                         <a th:if="${cat.active}" th:href="@{/admin/categories/toggle/{id}(id=${cat.id})}"
                            class="action-btn btn-danger-light">
                             Deactivate

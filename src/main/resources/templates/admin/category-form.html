@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: admin_layout('Add Category', ~{::content})}" th:with="activeMenu='categories'">
+      th:replace="~{admin/layout :: admin_layout(${category.id == null ? 'Add Category' : 'Edit Category'}, ~{::content})}" th:with="activeMenu='categories'">
 <body>
 <div th:fragment="content">
     <!-- HEADER -->
     <div class="page-header">
-        <div class="page-title">Create Category</div>
+        <div class="page-title" th:text="${category.id == null ? 'Create Category' : 'Edit Category'}">Create Category</div>
         <div class="page-subtitle">
             Category Master → Define product classification
         </div>
@@ -17,6 +17,8 @@
         <form th:action="@{/admin/categories/save}"
               method="post"
               th:object="${category}">
+            
+            <input type="hidden" th:field="*{id}" />
 
             <!-- ROW 1 -->
             <div class="row mb-3">

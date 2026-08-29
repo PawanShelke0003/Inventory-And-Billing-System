@@ -20,10 +20,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product createProduct(Product product, Long categoryId) {
+
+
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(()-> new RuntimeException("CATEGORY NOT FOUND"));
         product.setCategory(category);
-        product.setActive(true);
+        if(product.getId()==null){
+            product.setActive(true);
+        }
 
         return repository.save(product);
     }
@@ -63,5 +67,10 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> getLowStockProducts() {
         return repository.findByQuantityLessThan(5);
+    }
+
+    @Override
+    public List<Product> getActiveProductsByCategory(Long categoryId) {
+        return repository.findByCategoryIdAndActiveTrue(categoryId);
     }
 }

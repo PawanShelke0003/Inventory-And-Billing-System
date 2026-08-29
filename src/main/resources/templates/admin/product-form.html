@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: admin_layout('Add Product', ~{::content})}" th:with="activeMenu='products'">
+      th:replace="~{admin/layout :: admin_layout(${product.id == null ? 'Add Product' : 'Edit Product'}, ~{::content})}" th:with="activeMenu='products'">
 <body>
 <div th:fragment="content">
     <!-- HEADER -->
   <div class="page-header">
-    <div class="page-title">Create Product</div>
+    <div class="page-title" th:text="${product.id == null ? 'Create Product' : 'Edit Product'}">Create Product</div>
     <div class="page-subtitle">
       Product Master → Define basic product details
     </div>
@@ -17,6 +17,8 @@
     <form th:action="@{/admin/products/save}"
           method="post"
           th:object="${product}">
+          
+      <input type="hidden" th:field="*{id}" />
 
       <!-- ROW 1 -->
       <div class="row mb-3">
@@ -40,7 +42,8 @@
             <option value="">Select category</option>
             <option th:each="c : ${categories}"
                     th:value="${c.id}"
-                    th:text="${c.name}">
+                    th:text="${c.name}"
+                    th:selected="${product.category != null and product.category.id.toString() == c.id.toString()}">
             </option>
           </select>
           <div class="form-text">

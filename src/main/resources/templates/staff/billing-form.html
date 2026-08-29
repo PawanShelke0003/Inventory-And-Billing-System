@@ -15,6 +15,23 @@
         font-family: "Segoe UI", Roboto, sans-serif;
     }
 
+    /* Top bar */
+    .topbar {
+        background-color: #1f2937;
+        color: #ffffff;
+        padding: 14px 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .topbar-title {
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
     /* Page container */
     .page-container {
         padding: 25px;
@@ -24,151 +41,336 @@
 
     /* Header */
     .page-header {
-        margin-bottom: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
 
     .page-title {
-        font-size: 20px;
+        font-size: 24px;
         font-weight: 700;
-        color: #111827;
+        color: #212529;
+        margin-bottom: 4px;
     }
 
     .page-subtitle {
-        font-size: 13px;
-        color: #6b7280;
+        font-size: 14px;
+        color: #6c757d;
     }
 
-    /* ERP card */
-    .erp-card {
+    /* Professional Form Boxes */
+    .form-box {
         background: #ffffff;
-        border-radius: 8px;
-        padding: 22px;
-        box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+        border-radius: 4px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e5e7eb;
+        margin-bottom: 25px;
+        border-top: 4px solid #6c757d;
     }
+
+    .box-blue { border-top-color: #0d6efd; }
+    .box-purple { border-top-color: #6f42c1; }
 
     /* Section title */
     .section-title {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 700;
-        margin-bottom: 10px;
-        color: #111827;
+        margin-bottom: 20px;
+        color: #495057;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 10px;
+    }
+
+    /* Form Inputs */
+    .form-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .form-control {
+        border-radius: 4px;
+        font-size: 14px;
+        border: 1px solid #ced4da;
+        box-shadow: none;
+        transition: border-color 0.2s;
+    }
+    
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
     }
 
     /* Table */
+    .table-responsive {
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+
+    table {
+        margin-bottom: 0 !important;
+    }
+
     table th,
     table td {
-        text-align: center;
         vertical-align: middle;
-        font-size: 13px;
+        font-size: 14px;
     }
 
     table th {
-        background-color: #f1f5f9;
+        background-color: #f8f9fa;
         font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
     }
 
     /* Quantity input */
     .qty-input {
-        max-width: 90px;
-        margin: auto;
+        max-width: 100px;
+        text-align: center;
     }
 
     /* Footer actions */
     .form-actions {
         display: flex;
         justify-content: flex-end;
-        margin-top: 20px;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .btn {
+        border-radius: 4px;
+        font-weight: 600;
+        padding: 8px 20px;
+        letter-spacing: 0.3px;
     }
   </style>
 </head>
 
 <body>
 
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-title">Inventory Billing System</div>
+  <form th:action="@{/logout}" method="post" class="m-0">
+    <button class="btn btn-outline-light btn-sm" style="border-radius: 4px;">
+      <i class="bi bi-box-arrow-right"></i> Logout
+    </button>
+  </form>
+</div>
+
 <div class="page-container">
 
   <!-- HEADER -->
   <div class="page-header">
-    <div class="page-title">Create Bill</div>
-    <div class="page-subtitle">
-      Point of Sale → Generate customer invoice
+    <div>
+      <div class="page-title">Create New Bill</div>
+      <div class="page-subtitle">
+        Point of Sale <i class="bi bi-chevron-right" style="font-size: 10px;"></i> Generate customer invoice
+      </div>
     </div>
+    <a th:href="@{/staff/dashboard}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
   </div>
 
-  <form th:action="@{/staff/billing/save}" method="post">
+  <form id="billingForm" th:action="@{/staff/billing/save}" method="post">
 
     <!-- CUSTOMER DETAILS -->
-    <div class="erp-card mb-4">
-      <div class="section-title">Customer Details</div>
+    <div class="form-box box-blue">
+      <div class="section-title"><i class="bi bi-person-badge me-2"></i>Customer Details</div>
 
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">Customer Name</label>
+          <label class="form-label">Customer Name <span class="text-danger">*</span></label>
           <input type="text"
                  name="customerName"
                  class="form-control"
-                 placeholder="Enter customer name"
+                 placeholder="Enter full customer name"
                  required>
         </div>
 
         <div class="col-md-6 mb-3">
-          <label class="form-label">Phone Number</label>
-          <input type="text"
+          <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+          <input type="tel"
                  name="phone"
                  class="form-control"
-                 placeholder="Enter phone number"
+                 placeholder="Enter 10-digit phone number"
                  required>
         </div>
       </div>
     </div>
 
     <!-- PRODUCT SELECTION -->
-    <div class="erp-card">
-      <div class="section-title">Add Products</div>
+    <div class="form-box box-purple">
+      <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div class="section-title border-bottom-0 mb-0 pb-0" style="font-size: 16px;">
+          <i class="bi bi-cart-plus me-2 text-purple" style="color: #6f42c1;"></i>Add Products
+        </div>
+        
+        <!-- Filters (Search & Category) -->
+        <div class="d-flex gap-3">
+          <!-- Premium Search Bar -->
+          <div class="input-group input-group-sm" style="width: 250px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-radius: 6px;">
+            <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 6px 0 0 6px;">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="text" id="productSearch" class="form-control border-start-0 ps-0 shadow-none" 
+                   placeholder="Search products..." style="border-radius: 0 6px 6px 0;">
+          </div>
+
+          <!-- Category Filter -->
+          <select id="categoryFilter" class="form-select form-select-sm shadow-none" 
+                  style="width: 200px; box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important; border-radius: 6px;">
+            <option value="all">All Categories</option>
+            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+          </select>
+        </div>
+      </div>
 
       <div class="table-responsive">
-        <table class="table table-bordered table-hover table-sm">
+        <table class="table table-hover table-sm border-0" id="productTable">
           <thead>
           <tr>
-            <th style="width: 60px">S.No</th>
+            <th style="width: 60px; text-align: center;">S.No</th>
             <th>Product Name</th>
-            <th style="width: 140px">Quantity</th>
+            <th style="width: 150px; text-align: center;">Quantity</th>
           </tr>
           </thead>
-          <tbody>
-          <tr th:each="p, stat : ${products}">
-            <td th:text="${stat.index + 1}"></td>
-
-            <td th:text="${p.name}"></td>
-
-            <td>
-              <input type="number"
-                     min="0"
-                     class="form-control form-control-sm qty-input"
-                     th:name="|items[${stat.index}].quantity|">
-            </td>
-
-            <input type="hidden"
-                   th:name="|items[${stat.index}].productId|"
-                   th:value="${p.id}">
-          </tr>
+          <tbody id="productTableBody">
+            <!-- Populated by JavaScript -->
           </tbody>
         </table>
       </div>
-    </div>
+      
+      <!-- Hidden container for cart submission -->
+      <div id="cartHiddenInputs"></div>
 
-    <!-- ACTIONS -->
-    <div class="form-actions" style="gap: 10px;">
-      <a th:href="@{/staff/dashboard}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Back
-      </a>
-      <button type="submit" class="btn btn-success">
-        <i class="bi bi-receipt"></i> Generate Bill
-      </button>
+      <!-- ACTIONS -->
+      <div class="form-actions">
+        <button type="reset" class="btn btn-light border" onclick="cart.clear(); loadProducts('all');">
+          <i class="bi bi-x-circle me-1"></i> Clear Form
+        </button>
+        <button type="button" class="btn btn-success px-4" onclick="submitBill()">
+          <i class="bi bi-check-circle me-1"></i> Generate Bill
+        </button>
+      </div>
     </div>
 
   </form>
 
 </div>
+
+<script>
+    // Memory map to store selected items when switching categories
+    // Key: productId, Value: { name, quantity }
+    const cart = new Map(); 
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        // Load products on initial render
+        loadProducts('all');
+    });
+
+    // Listen for category changes
+    document.getElementById("categoryFilter").addEventListener("change", function(e) {
+        loadProducts(e.target.value);
+        // Clear search when switching categories
+        document.getElementById("productSearch").value = "";
+    });
+
+    // Premium live search filter
+    document.getElementById("productSearch").addEventListener("input", function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll("#productTableBody tr");
+        
+        rows.forEach(row => {
+            const productName = row.cells[1].textContent.toLowerCase();
+            if (productName.includes(searchTerm)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+
+    function loadProducts(categoryId) {
+        let url = categoryId === 'all' ? '/api/products/active' : `/api/products/category/${categoryId}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById("productTableBody");
+                tbody.innerHTML = ''; // Clear table
+                
+                data.forEach((product, index) => {
+                    const pId = product.id || product.Id || product.ID;
+                    // Check if this product is already in our cart memory
+                    const savedQty = cart.has(pId) ? cart.get(pId).quantity : '';
+                    
+                    const row = `
+                        <tr>
+                            <td style="text-align: center; color: #6c757d; font-weight: 500;">${index + 1}</td>
+                            <td style="font-weight: 500;">${product.name}</td>
+                            <td style="text-align: center;">
+                                <input type="number" min="0" class="form-control form-control-sm qty-input mx-auto" 
+                                       placeholder="0" value="${savedQty}" 
+                                       onchange="updateCart(${pId}, '${product.name}', this.value)">
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            })
+            .catch(error => console.error('Error fetching products:', error));
+    }
+
+    // Save quantity to memory when cashier types a number
+    function updateCart(productId, productName, quantityStr) {
+        const qty = parseInt(quantityStr);
+        if (qty > 0) {
+            cart.set(productId, { name: productName, quantity: qty });
+        } else {
+            cart.delete(productId);
+        }
+    }
+
+    // Prepare hidden inputs and submit form
+    function submitBill() {
+        const form = document.getElementById("billingForm");
+        
+        // Trigger browser's built-in required field validation
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        if(cart.size === 0) {
+            alert("Please add at least one product to the bill.");
+            return;
+        }
+
+        const hiddenContainer = document.getElementById("cartHiddenInputs");
+        let htmlStr = "";
+        
+        let index = 0;
+        cart.forEach((value, productId) => {
+            htmlStr += `<input type="hidden" name="items[${index}].productId" value="${productId}">`;
+            htmlStr += `<input type="hidden" name="items[${index}].quantity" value="${value.quantity}">`;
+            index++;
+        });
+        
+        hiddenContainer.innerHTML = htmlStr;
+
+        // Submit the parent form
+        form.submit();
+    }
+</script>
 
 </body>
 </html>

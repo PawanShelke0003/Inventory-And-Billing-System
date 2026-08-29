@@ -20,19 +20,19 @@ public class AdminSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${app.default.admin.password:admin123 }")
+    @Value("${app.default.admin.password:owner123 }")
     private String defaultadminpassword;
 
 
     @Override
     public void run(String... args) throws Exception {
 
-        Optional<User>adminOptional=userRepository.findByUsername("admin");
+        Optional<User>adminOptional=userRepository.findByUsername("owner");
 
         if(adminOptional.isEmpty()){
-            User adminUser = User.builder().username("admin").
-                    password(passwordEncoder.encode("admin123")).
-                    role(Role.ROLE_ADMIN).active(true).build();
+            User adminUser = User.builder().username("owner").
+                    password(passwordEncoder.encode("owner123")).
+                    role(Role.ROLE_OWNER).active(true).build();
 
             userRepository.save(adminUser);
             log.info("ADMIN CREATED SUCCESSFULLY");

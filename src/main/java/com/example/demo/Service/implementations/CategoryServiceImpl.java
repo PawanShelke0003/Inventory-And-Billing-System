@@ -15,13 +15,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category createCategory(Category category) {
-
-        repository.findByName(category.getName())
-                .ifPresent(c->{
-                        throw new RuntimeException("CATEGORY ALREADY EXIST");
-                }
-                );
-        category.setActive(true);
+        repository.findByName(category.getName()).ifPresent(c-> {
+            if (category.getId() == null || !c.getId().equals(category.getId())){
+                throw new RuntimeException("CATEGORY ALREADY EXIST");
+            }
+        } );
+         if(category.getId()==null){
+             category.setActive(true);
+         }
 
 
         return repository.save(category);
@@ -38,5 +39,13 @@ public class CategoryServiceImpl implements CategoryService {
         category.setActive(!category.getActive());
         repository.save(category);
 
+    }
+
+    @Override
+    public Category getCategoryById(Long id) {
+
+
+        return repository.findById(id).orElseThrow(()->
+                new RuntimeException("CATEGORY NOT FOUND"));
     }
 }

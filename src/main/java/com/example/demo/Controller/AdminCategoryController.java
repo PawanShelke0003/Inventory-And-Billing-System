@@ -37,4 +37,10 @@ public class AdminCategoryController {
         service.toggleCategoryStatus(id);
         return "redirect:/admin/categories";
     }
+    @GetMapping("/edit/{id}")
+    public String editCategory(@PathVariable Long id , Model model){
+       Category existingCategory = service.getCategoryById(id);
+       model.addAttribute("category",existingCategory);
+       return "admin/category-form";
+    }
 }
