@@ -1,67 +1,225 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Bill Receipt</title>
+  <meta charset="UTF-8">
+  <title>View Invoice | Inventory System</title>
+
+  <!-- Bootstrap CSS -->
   <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
   <style>
-    .receipt {
-      max-width: 800px;
-      margin: auto;
-      border: 1px solid #ddd;
-      padding: 20px;
+    body {
+        margin: 0;
+        background-color: #f5f7fb;
+        font-family: "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Top bar */
+    .topbar {
+        background-color: #1f2937;
+        color: #ffffff;
+        padding: 14px 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Hide topbar when printing */
+    @media print {
+        .topbar, .page-header, .btn-print, .btn-back {
+            display: none !important;
+        }
+        body {
+            background-color: #fff;
+        }
+        .invoice-card {
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+    }
+
+    .topbar-title {
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* Page container */
+    .page-container {
+        padding: 25px;
+        max-width: 900px;
+        margin: auto;
+    }
+
+    /* Header */
+    .page-header {
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #212529;
+        margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+        font-size: 14px;
+        color: #6c757d;
+    }
+
+    /* Invoice Card */
+    .invoice-card {
+        background: #ffffff;
+        border-radius: 6px;
+        padding: 40px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .invoice-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: #111827;
+        letter-spacing: 2px;
+    }
+    
+    .info-label {
+        font-size: 12px;
+        color: #6b7280;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    
+    .info-value {
+        font-size: 15px;
+        color: #111827;
+        font-weight: 500;
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        font-size: 14px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .grand-total-box {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        padding: 15px 20px;
+        display: inline-block;
+        border: 1px solid #e5e7eb;
     }
   </style>
 </head>
+
 <body>
 
-<div class="receipt mt-4">
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-title">Inventory Billing System</div>
+  <form th:action="@{/logout}" method="post" class="m-0">
+    <button class="btn btn-outline-light btn-sm" style="border-radius: 4px;">
+      <i class="bi bi-box-arrow-right"></i> Logout
+    </button>
+  </form>
+</div>
 
-  <h4 class="text-center">INVOICE</h4>
-  <hr>
+<div class="page-container">
 
-  <p>
-    <b>Bill ID:</b> <span th:text="${bill.id}"></span><br>
-    <b>Date:</b>
-    <span th:text="${#temporals.format(bill.billDate,'dd-MM-yyyy HH:mm')}"></span>
-  </p>
-
-  <p>
-    <b>Customer:</b> <span th:text="${bill.customer.name}"></span><br>
-    <b>Phone:</b> <span th:text="${bill.customer.phone}"></span>
-  </p>
-
-  <table class="table table-bordered">
-    <thead class="table-secondary">
-    <tr>
-      <th>Product</th>
-      <th>Price</th>
-      <th>Qty</th>
-      <th>Total</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="i : ${items}">
-      <td th:text="${i.product.name}"></td>
-      <td th:text="${i.price}"></td>
-      <td th:text="${i.quantity}"></td>
-      <td th:text="${i.total}"></td>
-    </tr>
-    </tbody>
-  </table>
-
-  <div class="text-end">
-    <p>Subtotal: <b th:text="${bill.totalAmount}"></b></p>
-    <p>GST (18%): <b th:text="${bill.gstAmount}"></b></p>
-    <h5>Grand Total: <b th:text="${bill.grandTotal}"></b></h5>
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Invoice Details</div>
+      <div class="page-subtitle">View and print bill record</div>
+    </div>
+    <div class="d-flex gap-2">
+      <button onclick="window.print()" class="btn btn-secondary btn-print">
+        <i class="bi bi-printer me-1"></i> Print
+      </button>
+      <a th:href="@{/staff/dashboard}" class="btn btn-primary btn-back">
+        <i class="bi bi-arrow-left me-1"></i> Back
+      </a>
+    </div>
   </div>
 
-  <div class="text-center mt-3">
-    <button onclick="window.print()" class="btn btn-secondary">
-      Print
-    </button>
-    <a th:href="@{/staff/dashboard}" class="btn btn-primary">
-      Back
-    </a>
+  <div class="invoice-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div class="invoice-title">INVOICE</div>
+      <div class="text-end">
+        <div class="info-label">Date</div>
+        <div class="info-value" th:text="${#temporals.format(bill.billDate,'dd MMM yyyy, hh:mm a')}"></div>
+      </div>
+    </div>
+    
+    <hr style="border-color: #e5e7eb; margin-bottom: 30px;">
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h6 class="text-muted mb-3" style="font-size: 13px; text-transform: uppercase; font-weight: 700;">Billed To:</h6>
+            <div class="info-value" style="font-size: 18px; font-weight: 700;" th:text="${bill.customer.name}"></div>
+            <div class="info-value mt-1 text-muted"><i class="bi bi-telephone text-muted me-1"></i> <span th:text="${bill.customer.phone}"></span></div>
+        </div>
+        <div class="col-md-6 text-md-end mt-4 mt-md-0">
+            <h6 class="text-muted mb-3" style="font-size: 13px; text-transform: uppercase; font-weight: 700;">Invoice Details:</h6>
+            <div class="info-label">Invoice Number</div>
+            <div class="info-value mb-2">#INV-<span th:text="${bill.id}"></span></div>
+            <div class="info-label">Generated By</div>
+            <div class="info-value"><span th:text="${bill.createdBy.username}"></span></div>
+        </div>
+    </div>
+
+    <div class="table-responsive mt-4">
+        <table class="table mb-0">
+            <thead>
+            <tr>
+                <th>Product</th>
+                <th class="text-center">Price</th>
+                <th class="text-center">Qty</th>
+                <th class="text-end">Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="i : ${items}">
+                <td th:text="${i.product.name}" style="font-weight: 600; color: #374151;"></td>
+                <td class="text-center text-muted">₹<span th:text="${i.price}"></span></td>
+                <td class="text-center" th:text="${i.quantity}"></td>
+                <td class="text-end fw-bold">₹<span th:text="${i.total}"></span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row mt-4 pt-4" style="border-top: 1px solid #f3f4f6;">
+        <div class="col-md-6 text-muted" style="font-size: 13px;">
+            Thank you for shopping with us!<br>
+            Please keep this invoice for your records.
+        </div>
+        <div class="col-md-6 text-end">
+            <p style="margin-bottom: 8px; color: #6b7280; font-size: 14px;">Subtotal: &nbsp;<b style="color: #111827;">₹<span th:text="${bill.totalAmount}"></span></b></p>
+            <p style="margin-bottom: 15px; color: #6b7280; font-size: 14px;">GST (18%): &nbsp;<b style="color: #111827;">₹<span th:text="${bill.gstAmount}"></span></b></p>
+            <div class="grand-total-box">
+                <h4 style="margin: 0; color: #10b981; font-weight: 700;">Grand Total: ₹<span th:text="${bill.grandTotal}"></span></h4>
+            </div>
+        </div>
+    </div>
   </div>
 
 </div>

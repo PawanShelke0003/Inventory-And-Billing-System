@@ -188,20 +188,26 @@
 
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">Customer Name <span class="text-danger">*</span></label>
-          <input type="text"
-                 name="customerName"
-                 class="form-control"
-                 placeholder="Enter full customer name"
-                 required>
-        </div>
-
-        <div class="col-md-6 mb-3">
           <label class="form-label">Phone Number <span class="text-danger">*</span></label>
           <input type="tel"
                  name="phone"
+                 id="customerPhone"
                  class="form-control"
                  placeholder="Enter 10-digit phone number"
+                 maxlength="15"
+                 required>
+          <div id="phoneHelp" class="form-text" style="font-size: 11px; color: #10b981; display: none;">
+            <i class="bi bi-check-circle-fill"></i> Customer found!
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Customer Name <span class="text-danger">*</span></label>
+          <input type="text"
+                 name="customerName"
+                 id="customerName"
+                 class="form-control"
+                 placeholder="Enter full customer name"
                  required>
         </div>
       </div>
@@ -282,6 +288,47 @@
         loadProducts(e.target.value);
         // Clear search when switching categories
         document.getElementById("productSearch").value = "";
+    });
+
+    // Customer Auto-fill Logic
+    document.getElementById("customerPhone").addEventListener("input", function(e) {
+        const phone = e.target.value;
+        const nameInput = document.getElementById("customerName");
+        const helpText = document.getElementById("phoneHelp");
+        
+        // Trigger search when phone number is at least 10 digits
+        if (phone.length >= 10) {
+            fetch(`/api/customers/phone/${phone}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Not found');
+                })
+                .then(data => {
+                    nameInput.value = data.name;
+                    nameInput.readOnly = true;
+                    nameInput.classList.add('bg-light');
+                    helpText.style.display = 'block';
+                })
+                .catch(() => {
+                    // Not found in DB - make editable for new customer
+                    if (nameInput.readOnly) {
+                        nameInput.value = "";
+                        nameInput.readOnly = false;
+                        nameInput.classList.remove('bg-light');
+                        helpText.style.display = 'none';
+                    }
+                });
+        } else {
+            // Reset if user deletes digits
+            if (nameInput.readOnly) {
+                nameInput.value = "";
+                nameInput.readOnly = false;
+                nameInput.classList.remove('bg-light');
+                helpText.style.display = 'none';
+            }
+        }
     });
 
     // Premium live search filter
