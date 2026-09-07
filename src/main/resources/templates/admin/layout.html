@@ -408,6 +408,11 @@
             </a>
         </li>
         <li>
+            <a th:href="@{/admin/bills}" th:classappend="${activeMenu == 'bills' ? 'active' : ''}">
+                <i class="bi bi-receipt"></i> <span class="link-text">Bill Management</span>
+            </a>
+        </li>
+        <li>
             <a th:href="@{/admin/products}" th:classappend="${activeMenu == 'products' ? 'active' : ''}">
                 <i class="bi bi-box-seam"></i> <span class="link-text">Products</span>
             </a>

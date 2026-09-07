@@ -38,37 +38,6 @@
         </div>
     </div>
 
-    <!-- TABLE SECTION -->
-    <div class="table-container">
-        <h4 class="table-title">Recent Bill History</h4>
-        
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>S.No</th>
-                    <th>Date & Time</th>
-                    <th>Customer Name</th>
-                    <th>Staff</th>
-                    <th>Total Amount</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="b, stat : ${bills}">
-                    <td th:text="${stat.index + 1}">1</td>
-                    <td th:text="${#temporals.format(b.billDate,'dd-MM-yyyy hh:mm a')}">Date</td>
-                    <td th:text="${b.customer.name}" style="font-weight: 600;">Customer</td>
-                    <td th:text="${b.createdBy.username}">Staff</td>
-                    <td class="amt-text">₹ <span th:text="${b.grandTotal}"></span></td>
-                    <td>
-                        <a th:href="@{/admin/billing/view/{id}(id=${b.id})}" class="action-btn">View</a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
 </body>
 </html>

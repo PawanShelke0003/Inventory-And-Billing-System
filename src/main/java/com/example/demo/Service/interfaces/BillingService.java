@@ -6,6 +6,8 @@ import com.example.demo.Models.Customer;
 import com.example.demo.Models.User;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BillingService {
@@ -17,4 +19,6 @@ public interface BillingService {
     List<Bill>getAllBills();
     long getTodaysBillCount(User staff);
     BigDecimal getTodaysSales(User staff);
+    List<Bill>getStaffsBillsWithFilters(Long staffId, String phone, LocalDate startDate, LocalDate endDate);
+    BigDecimal calculateTotalRevenue(List<Bill> bills);
 }

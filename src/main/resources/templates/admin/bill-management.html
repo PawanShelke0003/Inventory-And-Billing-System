@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: admin_layout('Staff Directory', ~{::content})}" th:with="activeMenu='bills'">
+<body>
+<div th:fragment="content">
+    
+    <div class="page-header">
+        <div>
+            <div class="page-title">Staff Billing Profiles</div>
+            <div class="page-subtitle">Select a staff member to view their billing history and end-of-shift reconciliation.</div>
+        </div>
+        <div>
+            <!-- Global Phone Search (Quick Lookup) -->
+            <form th:action="@{/admin/bills/search}" method="get" class="d-flex" style="gap: 10px;">
+                <input type="tel" name="phone" class="form-control" placeholder="Quick Search Customer Phone..." required style="width: 250px;" maxlength="15">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Find</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- STAFF GRID -->
+    <div class="row mt-4">
+        <div class="col-md-4 mb-4" th:each="user : ${users}">
+            <div class="card h-100" style="border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s;">
+                <div class="card-body text-center p-4">
+                    <div style="width: 70px; height: 70px; background-color: #eff6ff; color: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 15px;">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <h5 class="card-title fw-bold" style="color: #1e293b; margin-bottom: 5px;" th:text="${user.username}">Staff Name</h5>
+                    <p class="card-text text-muted mb-4" style="font-size: 13px;" th:text="${user.role}">Role</p>
+                    
+                    <a th:href="@{/admin/bills/staff/{id}(id=${user.id})}" class="btn w-100" style="background-color: #f1f5f9; color: #334155; font-weight: 600;">
+                        View Billing Profile <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12" th:if="${users == null or users.isEmpty()}">
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-people" style="font-size: 3rem;"></i>
+                <p class="mt-3">No staff members found.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

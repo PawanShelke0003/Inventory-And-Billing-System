@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -115,6 +116,39 @@ public class BillingServiceImpl implements BillingService {
                 stream().filter(b->b.getBillDate()!=null&&b.getBillDate().toLocalDate().
                         isEqual(today)).map(Bill::getGrandTotal).
                 reduce(BigDecimal.ZERO,java.math.BigDecimal::add);
+    }
+
+    @Override
+    public List<Bill> getStaffsBillsWithFilters(Long staffId, String phone, LocalDate startDate, LocalDate endDate) {
+
+        if(startDate==null&&endDate==null&&phone==null||phone.trim().isEmpty()){
+            startDate = LocalDate.now();
+            endDate=LocalDate.now();
+        }
+
+        LocalDateTime startDateTime = null;
+        LocalDateTime endDateTime = null;
+
+        if(startDate!=null){
+            startDateTime = startDate.atStartOfDay();
+        }
+        if(endDateTime!=null){
+            endDateTime=endDate.atTime(23,59,59);
+        }
+        if(phone!=null&&phone.trim().isEmpty()){
+            phone = null;
+        }
+
+
+        return billRepo.findStaffBillsWithFilters(staffId,phone,startDateTime,endDateTime);
+    }
+
+    @Override
+    public BigDecimal calculateTotalRevenue(List<Bill> bills) {
+        if(bills==null||bills.isEmpty()){
+            return BigDecimal.ZERO;
+        }
+        return bills.stream().map(Bill::getGrandTotal).reduce(BigDecimal.ZERO,BigDecimal::add);
     }
 
 }
