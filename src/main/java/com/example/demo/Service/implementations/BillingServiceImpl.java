@@ -121,7 +121,7 @@ public class BillingServiceImpl implements BillingService {
     @Override
     public List<Bill> getStaffsBillsWithFilters(Long staffId, String phone, LocalDate startDate, LocalDate endDate) {
 
-        if(startDate==null&&endDate==null&&phone==null||phone.trim().isEmpty()){
+        if(startDate==null&&endDate==null&&phone==null||(phone.trim().isEmpty())){
             startDate = LocalDate.now();
             endDate=LocalDate.now();
         }
@@ -132,7 +132,7 @@ public class BillingServiceImpl implements BillingService {
         if(startDate!=null){
             startDateTime = startDate.atStartOfDay();
         }
-        if(endDateTime!=null){
+        if(endDate!=null){
             endDateTime=endDate.atTime(23,59,59);
         }
         if(phone!=null&&phone.trim().isEmpty()){
@@ -150,5 +150,7 @@ public class BillingServiceImpl implements BillingService {
         }
         return bills.stream().map(Bill::getGrandTotal).reduce(BigDecimal.ZERO,BigDecimal::add);
     }
+
+
 
 }

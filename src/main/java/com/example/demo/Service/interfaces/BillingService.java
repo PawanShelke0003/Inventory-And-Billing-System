@@ -21,4 +21,5 @@ public interface BillingService {
     BigDecimal getTodaysSales(User staff);
     List<Bill>getStaffsBillsWithFilters(Long staffId, String phone, LocalDate startDate, LocalDate endDate);
     BigDecimal calculateTotalRevenue(List<Bill> bills);
+
 }

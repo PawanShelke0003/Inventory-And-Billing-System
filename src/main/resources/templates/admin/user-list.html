@@ -43,7 +43,7 @@
                 <tbody>
                 <tr th:each="u : ${users}">
                     <td th:text="${u.username}"></td>
-                    <td th:text="${u.role.name() == 'ROLE_ADMIN' ? 'Manager' : (u.role.name() == 'ROLE_STAFF' ? 'Staff' : u.role.name())}"></td>
+                    <td th:text="${u.role.name() == 'ROLE_OWNER' ? 'Owner' : (u.role.name() == 'ROLE_MANAGER' ? 'Manager' : 'Staff')}"></td>
 
                     <!-- STATUS -->
                     <td>

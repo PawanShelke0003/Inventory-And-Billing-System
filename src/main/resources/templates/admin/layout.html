@@ -27,30 +27,45 @@
             width: var(--sidebar-width);
             height: 100vh;
             position: fixed;
+            top: 0;
+            left: 0;
             background-color: var(--sidebar-bg);
             color: #fff;
-            padding: 24px 16px;
+            padding: 24px 16px 80px 16px;   /* bottom padding reserves space for logout */
             display: flex;
             flex-direction: column;
+            overflow: hidden;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             z-index: 1000;
+            box-sizing: border-box;
         }
         .sidebar.collapsed {
             width: var(--sidebar-collapsed-width);
-            padding: 24px 10px;
+            padding: 24px 10px 80px 10px;
         }
         .sidebar-brand {
             color: #fff;
             font-weight: 700;
             font-size: 20px;
             padding-left: 12px;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
             display: flex;
             align-items: center;
             gap: 12px;
             white-space: nowrap;
+            flex-shrink: 0;
         }
-        .sidebar-brand i { color: #3b82f6; font-size: 24px;}
+        .sidebar-brand i { color: #3b82f6; font-size: 24px; }
+        /* NAV WRAPPER — scrolls freely */
+        .sidebar-nav-wrapper {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .sidebar-nav-wrapper::-webkit-scrollbar { width: 3px; }
+        .sidebar-nav-wrapper::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-nav-wrapper::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
         .sidebar-links {
             list-style: none;
             padding: 0;
@@ -61,7 +76,7 @@
             align-items: center;
             gap: 16px;
             padding: 12px 14px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: #9ca3af;
             text-decoration: none;
             border-radius: 10px;
@@ -70,27 +85,23 @@
             transition: all 0.2s ease;
             white-space: nowrap;
         }
-        .sidebar-links a:hover {
-            background-color: var(--sidebar-hover);
-            color: #ffffff;
-        }
-        .sidebar-links a.active {
-            background-color: rgba(37, 99, 235, 0.15);
-            color: #60a5fa;
-        }
-        .sidebar-links a i {
-            font-size: 20px;
-            min-width: 24px;
-            text-align: center;
-        }
+        .sidebar-links a:hover { background-color: var(--sidebar-hover); color: #ffffff; }
+        .sidebar-links a.active { background-color: rgba(37,99,235,0.15); color: #60a5fa; }
+        .sidebar-links a i { font-size: 20px; min-width: 24px; text-align: center; }
         .sidebar.collapsed .link-text,
-        .sidebar.collapsed .brand-text {
-            display: none;
-        }
+        .sidebar.collapsed .brand-text { display: none; }
+        /* LOGOUT — absolutely pinned to the bottom, ALWAYS visible */
         .logout-container {
-            margin-top: auto;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px 16px 16px;
+            background-color: var(--sidebar-bg);
             border-top: 1px solid #374151;
-            padding-top: 20px;
+        }
+        .sidebar.collapsed .logout-container {
+            padding: 12px 10px 16px;
         }
         .btn-logout {
             background: transparent;
@@ -98,17 +109,19 @@
             border: none;
             width: 100%;
             text-align: left;
-            padding: 12px 14px;
+            padding: 11px 14px;
             display: flex;
             align-items: center;
             gap: 16px;
             font-weight: 600;
+            font-size: 15px;
             border-radius: 10px;
             transition: 0.2s;
+            cursor: pointer;
+            white-space: nowrap;
         }
-        .btn-logout:hover {
-            background: rgba(239, 68, 68, 0.1);
-        }
+        .btn-logout i { font-size: 20px; min-width: 24px; text-align: center; }
+        .btn-logout:hover { background: rgba(239, 68, 68, 0.1); }
         /* --- MAIN CONTENT --- */
         .main-content {
             margin-left: var(--sidebar-width);
@@ -401,41 +414,47 @@
         <i class="bi bi-box-fill"></i>
         <span class="brand-text">InventorySys</span>
     </div>
-    <ul class="sidebar-links">
-        <li>
-            <a th:href="@{/admin/dashboard}" th:classappend="${activeMenu == 'dashboard' ? 'active' : ''}">
-                <i class="bi bi-grid-fill"></i> <span class="link-text">Dashboard</span>
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/bills}" th:classappend="${activeMenu == 'bills' ? 'active' : ''}">
-                <i class="bi bi-receipt"></i> <span class="link-text">Bill Management</span>
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/products}" th:classappend="${activeMenu == 'products' ? 'active' : ''}">
-                <i class="bi bi-box-seam"></i> <span class="link-text">Products</span>
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/categories}" th:classappend="${activeMenu == 'categories' ? 'active' : ''}">
-                <i class="bi bi-tags"></i> <span class="link-text">Categories</span>
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/users}" th:classappend="${activeMenu == 'users' ? 'active' : ''}">
-                <i class="bi bi-people"></i> <span class="link-text">Users</span>
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/admin/products/stock}" th:classappend="${activeMenu == 'stock' ? 'active' : ''}">
-                <i class="bi bi-exclamation-triangle"></i> <span class="link-text">Stock Alerts</span>
-            </a>
-        </li>
-    </ul>
+
+    <!-- SCROLLABLE NAV AREA -->
+    <div class="sidebar-nav-wrapper">
+        <ul class="sidebar-links">
+            <li>
+                <a th:href="@{/admin/dashboard}" th:classappend="${activeMenu == 'dashboard' ? 'active' : ''}">
+                    <i class="bi bi-grid-fill"></i> <span class="link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/bills}" th:classappend="${activeMenu == 'bills' ? 'active' : ''}">
+                    <i class="bi bi-receipt"></i> <span class="link-text">Bill Management</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/products}" th:classappend="${activeMenu == 'products' ? 'active' : ''}">
+                    <i class="bi bi-box-seam"></i> <span class="link-text">Products</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/categories}" th:classappend="${activeMenu == 'categories' ? 'active' : ''}">
+                    <i class="bi bi-tags"></i> <span class="link-text">Categories</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/users}" th:classappend="${activeMenu == 'users' ? 'active' : ''}">
+                    <i class="bi bi-people"></i> <span class="link-text">Users</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/products/stock}" th:classappend="${activeMenu == 'stock' ? 'active' : ''}">
+                    <i class="bi bi-exclamation-triangle"></i> <span class="link-text">Stock Alerts</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- LOGOUT — always pinned to bottom -->
     <div class="logout-container">
         <form th:action="@{/logout}" method="post">
-            <button class="btn-logout">
+            <button class="btn-logout" type="submit">
                 <i class="bi bi-box-arrow-right"></i> <span class="link-text">Sign Out</span>
             </button>
         </form>
@@ -453,7 +472,7 @@
             <h4 th:text="${title}">Dashboard</h4>
         </div>
         <div class="user-profile">
-            <span>Welcome, Admin</span>
+            <span th:text="|Welcome, ${loggedInUser}|">Welcome, Admin</span>
             <i class="bi bi-person-circle"></i>
         </div>
     </div>

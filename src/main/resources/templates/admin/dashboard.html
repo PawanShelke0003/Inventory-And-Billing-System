@@ -3,6 +3,15 @@
       th:replace="~{admin/layout :: admin_layout('Overview', ~{::content})}" th:with="activeMenu='dashboard'">
 <body>
 <div th:fragment="content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header" style="margin-bottom: 28px;">
+        <div>
+            <div class="page-title">Overview</div>
+            <div class="page-subtitle">Welcome back! Here's a summary of your business.</div>
+        </div>
+    </div>
+
     <!-- STATS CARDS -->
     <div class="stats-grid">
         <div class="stat-card">
@@ -12,7 +21,7 @@
             </div>
             <div class="stat-icon icon-green"><i class="bi bi-currency-rupee"></i></div>
         </div>
-        
+
         <div class="stat-card">
             <div class="stat-info">
                 <small>Total Bills</small>
@@ -20,15 +29,15 @@
             </div>
             <div class="stat-icon icon-blue"><i class="bi bi-receipt"></i></div>
         </div>
-        
+
         <div class="stat-card">
             <div class="stat-info">
-                <small>Products</small>
+                <small>Active Products</small>
                 <h2 th:text="${productCount}">0</h2>
             </div>
             <div class="stat-icon icon-orange"><i class="bi bi-box-seam"></i></div>
         </div>
-        
+
         <div class="stat-card">
             <div class="stat-info">
                 <small>Active Users</small>
@@ -38,6 +47,75 @@
         </div>
     </div>
 
+    <!-- QUICK ACTIONS -->
+    <div>
+        <div style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 16px;">Quick Actions</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px;">
+
+            <a th:href="@{/admin/bills}" class="quick-action-card" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                <div class="qa-icon"><i class="bi bi-receipt-cutoff"></i></div>
+                <div class="qa-text">
+                    <div class="qa-title">Bill Management</div>
+                    <div class="qa-sub">View staff billing profiles</div>
+                </div>
+                <i class="bi bi-arrow-right qa-arrow"></i>
+            </a>
+
+            <a th:href="@{/admin/products/add}" class="quick-action-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <div class="qa-icon"><i class="bi bi-plus-circle"></i></div>
+                <div class="qa-text">
+                    <div class="qa-title">Add Product</div>
+                    <div class="qa-sub">Register a new item</div>
+                </div>
+                <i class="bi bi-arrow-right qa-arrow"></i>
+            </a>
+
+            <a th:href="@{/admin/users}" class="quick-action-card" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                <div class="qa-icon"><i class="bi bi-person-plus"></i></div>
+                <div class="qa-text">
+                    <div class="qa-title">Manage Users</div>
+                    <div class="qa-sub">Add or edit staff accounts</div>
+                </div>
+                <i class="bi bi-arrow-right qa-arrow"></i>
+            </a>
+
+            <a th:href="@{/admin/products/stock}" class="quick-action-card" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                <div class="qa-icon"><i class="bi bi-exclamation-triangle"></i></div>
+                <div class="qa-text">
+                    <div class="qa-title">Stock Alerts</div>
+                    <div class="qa-sub">Check low inventory items</div>
+                </div>
+                <i class="bi bi-arrow-right qa-arrow"></i>
+            </a>
+
+        </div>
+    </div>
+
 </div>
+
+<style>
+    .quick-action-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px 20px;
+        border-radius: 14px;
+        text-decoration: none;
+        color: white;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .quick-action-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        color: white;
+    }
+    .qa-icon { font-size: 26px; opacity: 0.9; min-width: 32px; }
+    .qa-text { flex: 1; }
+    .qa-title { font-weight: 700; font-size: 15px; }
+    .qa-sub { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+    .qa-arrow { font-size: 18px; opacity: 0.7; }
+</style>
 </body>
 </html>
+

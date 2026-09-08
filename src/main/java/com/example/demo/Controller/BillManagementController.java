@@ -31,10 +31,10 @@ public class BillManagementController {
     }
     @GetMapping("staff/{id}")
     public String showStaffDashboard(
-            @PathVariable Long id,
-            @PathVariable(required = false) String phone,
-            @PathVariable(required = false)LocalDate startDate,
-            @PathVariable(required = false)LocalDate endDate,
+            @PathVariable("id") Long id,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false)LocalDate endDate,
+            @RequestParam(required = false)LocalDate startDate,
             Model model
             ){
 

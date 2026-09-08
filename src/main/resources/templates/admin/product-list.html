@@ -5,8 +5,10 @@
 <div th:fragment="content">
     <!-- HEADER -->
   <div class="page-header">
-    <div class="page-title">Product Master</div>
-
+    <div>
+        <div class="page-title">Product Master</div>
+        <div class="page-subtitle">Manage inventory items, prices, and availability.</div>
+    </div>
     <a th:href="@{/admin/products/add}" class="btn btn-success btn-sm">
       <i class="bi bi-plus-lg"></i> Add Product
     </a>
