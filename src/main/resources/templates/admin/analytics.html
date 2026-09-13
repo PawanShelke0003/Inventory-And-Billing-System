@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: admin_layout('Analytics', ~{::content})}" th:with="activeMenu='analytics'">
+<body>
+<div th:fragment="content">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header" style="margin-bottom: 24px;">
+        <div>
+            <div class="page-title">Analytics Dashboard</div>
+            <div class="page-subtitle">Sales trends, staff performance &amp; category insights.</div>
+        </div>
+    </div>
+
+    <!-- ── FILTER BAR ─────────────────────────────────────────────────── -->
+    <div style="background:#fff; border-radius:14px; padding:18px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid #f1f5f9; margin-bottom:24px;">
+        <form th:action="@{/admin/analytics}" method="get">
+            <div style="display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap;">
+
+                <!-- Date From -->
+                <div style="min-width:150px;">
+                    <label style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; display:block; margin-bottom:6px;">From Date</label>
+                    <input type="date" name="startDate" class="form-control" th:value="${startDate}">
+                </div>
+
+                <!-- Date To -->
+                <div style="min-width:150px;">
+                    <label style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; display:block; margin-bottom:6px;">To Date</label>
+                    <input type="date" name="endDate" class="form-control" th:value="${endDate}">
+                </div>
+
+                <!-- Staff Filter -->
+                <div style="min-width:180px; flex:1;">
+                    <label style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; display:block; margin-bottom:6px;">Staff Member</label>
+                    <select name="staffId" class="form-control" id="staffSelect">
+                        <option value="">All Staff</option>
+                        <option th:each="s : ${allStaff}"
+                                th:value="${s.id}"
+                                th:text="${s.username}"
+                                th:selected="${selectedStaffId != null and selectedStaffId == s.id}">Staff</option>
+                    </select>
+                </div>
+
+                <!-- Category Filter -->
+                <div style="min-width:180px; flex:1;">
+                    <label style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; display:block; margin-bottom:6px;">Category</label>
+                    <select name="categoryId" class="form-control">
+                        <option value="">All Categories</option>
+                        <option th:each="c : ${allCategories}"
+                                th:value="${c.id}"
+                                th:text="${c.name}"
+                                th:selected="${categoryId != null and categoryId == c.id}">Category</option>
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div style="display:flex; gap:8px; padding-bottom:1px;">
+                    <button type="submit" class="btn btn-primary" style="height:40px; padding:0 22px; font-weight:600;">
+                        <i class="bi bi-funnel"></i> Apply
+                    </button>
+                    <!-- Quick presets -->
+                    <a th:href="@{/admin/analytics(startDate=${#temporals.format(#temporals.createNow(),'yyyy-MM-dd')},endDate=${#temporals.format(#temporals.createNow(),'yyyy-MM-dd')})}"
+                       style="height:40px; padding:0 14px; display:inline-flex; align-items:center; border:1px solid #d1d5db; border-radius:8px; font-size:13px; font-weight:600; color:#374151; text-decoration:none; background:#fff;">Today</a>
+                    <a th:href="@{/admin/analytics}"
+                       style="height:40px; padding:0 14px; display:inline-flex; align-items:center; border:1px solid #d1d5db; border-radius:8px; font-size:13px; font-weight:600; color:#6b7280; text-decoration:none; background:#fff;">
+                        <i class="bi bi-x"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ── KPI CARDS ──────────────────────────────────────────────────── -->
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:24px;">
+
+        <div style="background:linear-gradient(135deg,#10b981,#059669); border-radius:14px; padding:22px 24px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 14px rgba(16,185,129,0.25);">
+            <div>
+                <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75); text-transform:uppercase; letter-spacing:0.5px;">Total Revenue</div>
+                <div style="font-size:28px; font-weight:800; color:#fff; margin-top:6px;">
+                    ₹ <span th:text="${totalRevenue != null ? totalRevenue : '0.00'}">0.00</span>
+                </div>
+            </div>
+            <i class="bi bi-currency-rupee" style="font-size:44px; color:rgba(255,255,255,0.2);"></i>
+        </div>
+
+        <div style="background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:14px; padding:22px 24px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 14px rgba(59,130,246,0.25);">
+            <div>
+                <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75); text-transform:uppercase; letter-spacing:0.5px;">Total Bills</div>
+                <div style="font-size:28px; font-weight:800; color:#fff; margin-top:6px;" th:text="${totalBills != null ? totalBills : 0}">0</div>
+            </div>
+            <i class="bi bi-receipt" style="font-size:44px; color:rgba(255,255,255,0.2);"></i>
+        </div>
+
+        <div style="background:linear-gradient(135deg,#8b5cf6,#7c3aed); border-radius:14px; padding:22px 24px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 14px rgba(139,92,246,0.25);">
+            <div>
+                <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75); text-transform:uppercase; letter-spacing:0.5px;">Avg Order Value</div>
+                <div style="font-size:28px; font-weight:800; color:#fff; margin-top:6px;">
+                    ₹ <span th:text="${averageOrder != null ? averageOrder : '0.00'}">0.00</span>
+                </div>
+            </div>
+            <i class="bi bi-graph-up" style="font-size:44px; color:rgba(255,255,255,0.2);"></i>
+        </div>
+
+    </div>
+
+
+
+    <!-- ── CHARTS ROW 1: Line + Bar ───────────────────────────────────── -->
+    <div th:style="${selectedStaffId == null ? 'display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;' : 'display:grid; grid-template-columns:1fr; gap:20px; margin-bottom:24px;'}">
+
+        <!-- Revenue Trend Line Chart -->
+        <div style="background:#fff; border-radius:14px; padding:22px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+            <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:4px;">Revenue Trend</div>
+            <div style="font-size:12px; color:#9ca3af; margin-bottom:16px;">Daily sales for selected period</div>
+            <canvas id="trendChart" height="200"></canvas>
+        </div>
+
+        <!-- Staff Leaderboard Bar Chart -->
+        <div th:if="${selectedStaffId == null}" style="background:#fff; border-radius:14px; padding:22px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+            <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:4px;">Staff Leaderboard</div>
+            <div style="font-size:12px; color:#9ca3af; margin-bottom:16px;">Revenue generated per staff member</div>
+            <canvas id="staffChart" height="200"></canvas>
+        </div>
+
+    </div>
+
+    <!-- ── CHARTS ROW 2: Doughnut + Top Products Table ────────────────── -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
+
+        <!-- Category Split Doughnut -->
+        <div style="background:#fff; border-radius:14px; padding:22px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+            <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:4px;">Category Split</div>
+            <div style="font-size:12px; color:#9ca3af; margin-bottom:16px;">Revenue share by product category</div>
+            <div style="max-width:260px; margin:0 auto;">
+                <canvas id="categoryChart" height="220"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Selling Products Table -->
+        <div style="background:#fff; border-radius:14px; padding:22px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+            <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:4px;">Top Selling Products</div>
+            <div style="font-size:12px; color:#9ca3af; margin-bottom:16px;">Ranked by quantity sold</div>
+            <table class="table" style="margin-bottom:0;">
+                <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th>Product</th>
+                    <th style="text-align:right;">Qty Sold</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Thymeleaf renders the productLabels/productValues lists into table rows -->
+                <th:block th:each="label, stat : ${productLabels}">
+                    <tr>
+                        <td style="color:#94a3b8; font-weight:600;" th:text="${stat.count}">1</td>
+                        <td style="font-weight:600;" th:text="${label}">Product</td>
+                        <td style="text-align:right; font-weight:700; color:#059669;"
+                            th:text="${productValues[stat.index]}">0</td>
+                    </tr>
+                </th:block>
+                <tr th:if="${productLabels == null or productLabels.isEmpty()}">
+                    <td colspan="3" style="text-align:center; color:#94a3b8; padding:30px 0;">No data for selected period.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- ── CHART.JS SCRIPTS ───────────────────────────────────────────── -->
+    <script th:inline="javascript">
+        const trendLabels   = /*[[${trendLabels}]]*/ [];
+        const trendValues   = /*[[${trendValues}]]*/ [];
+        const staffLabels   = /*[[${staffLabels}]]*/ [];
+        const staffValues   = /*[[${staffValues}]]*/ [];
+        const catLabels     = /*[[${categoryLabels}]]*/ [];
+        const catValues     = /*[[${categoryValues}]]*/ [];
+
+        // ── Line Chart: Daily Revenue Trend ──────────────────────────────
+        new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: trendValues,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59,130,246,0.08)',
+                    borderWidth: 2.5,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#3b82f6',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { callback: v => '₹' + v } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // ── Bar Chart: Staff Leaderboard ──────────────────────────────────
+        new Chart(document.getElementById('staffChart'), {
+            type: 'bar',
+            data: {
+                labels: staffLabels,
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: staffValues,
+                    backgroundColor: ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#06b6d4'],
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { callback: v => '₹' + v } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // ── Doughnut Chart: Category Revenue Split ────────────────────────
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{
+                    data: catValues,
+                    backgroundColor: ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#06b6d4','#f97316'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 12, font: { size: 12 } }
+                    }
+                }
+            }
+        });
+    </script>
+
+</div>
+</body>
+</html>

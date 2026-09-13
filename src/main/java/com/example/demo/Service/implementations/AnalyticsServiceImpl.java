@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,23 +56,28 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     }
 
     @Override
-    public List<AnalyticsDTO> getDailyRevenueTrend(LocalDate start, LocalDate end) {
-        return billRepository.findDailyRevenueTrend(startOf(start),endOf(end));
+    public List<AnalyticsDTO> getDailyRevenueTrend(LocalDate start, LocalDate end, Long staffId) {
+        List<Object[]> rows = billRepository.findDailyRevenueTrend(startOf(start), endOf(end), staffId);
+        return rows.stream()
+                .map(r -> new AnalyticsDTO(
+                        (String) r[0],
+                        r[1] != null ? new BigDecimal(r[1].toString()) : BigDecimal.ZERO))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<AnalyticsDTO> geTopSellingProduct(LocalDate start, LocalDate end) {
-        return billItemRepository.findTopSellingProducts(startOf(start),endOf(end));
+    public List<AnalyticsDTO> geTopSellingProduct(LocalDate start, LocalDate end, Long staffId) {
+        return billItemRepository.findTopSellingProducts(startOf(start),endOf(end), staffId);
     }
 
     @Override
-    public List<AnalyticsDTO> getRevenueByCategory(LocalDate start, LocalDate end) {
-        return billItemRepository.findRevenueByCategory(startOf(start),endOf(end));
+    public List<AnalyticsDTO> getRevenueByCategory(LocalDate start, LocalDate end, Long staffId) {
+        return billItemRepository.findRevenueByCategory(startOf(start),endOf(end), staffId);
     }
 
     @Override
-    public List<AnalyticsDTO> getTopSellingProductsByCategory(LocalDate start, LocalDate end, Long categoryId) {
-        return billItemRepository.findTopSellingProductByCategory(startOf(start),endOf(end),categoryId);
+    public List<AnalyticsDTO> getTopSellingProductsByCategory(LocalDate start, LocalDate end, Long categoryId, Long staffId) {
+        return billItemRepository.findTopSellingProductByCategory(startOf(start),endOf(end),categoryId, staffId);
     }
 
     @Override
@@ -82,6 +88,26 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     @Override
     public long getBillCountByStaff(Long staffId, LocalDate start, LocalDate end) {
         return billRepository.countBillsByStaffBetween(staffId,startOf(start),endOf(end));
+    }
+
+    @Override
+    public BigDecimal getRevenueByCategoryFilter(LocalDate start, LocalDate end, Long staffId, Long categoryId) {
+        return billItemRepository.findTotalRevenueByCategoryFilter(startOf(start), endOf(end), staffId, categoryId);
+    }
+
+    @Override
+    public long getBillCountByCategoryFilter(LocalDate start, LocalDate end, Long staffId, Long categoryId) {
+        return billRepository.countBillsByCategoryFilter(startOf(start), endOf(end), staffId, categoryId);
+    }
+
+    @Override
+    public List<AnalyticsDTO> getDailyRevenueTrendByCategory(LocalDate start, LocalDate end, Long staffId, Long categoryId) {
+        List<Object[]> rows = billRepository.findDailyRevenueTrendByCategory(startOf(start), endOf(end), staffId, categoryId);
+        return rows.stream()
+                .map(r -> new AnalyticsDTO(
+                        (String) r[0],
+                        r[1] != null ? new BigDecimal(r[1].toString()) : BigDecimal.ZERO))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -104,7 +130,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public List<AnalyticsDTO> getMonthlyRevenueTrend(LocalDate start, LocalDate end) {
-        return billRepository.findMonthlyRevenueTrend(startOf(start),endOf(end));
+        List<Object[]> rows = billRepository.findMonthlyRevenueTrend(startOf(start), endOf(end));
+        return rows.stream()
+                .map(r -> new AnalyticsDTO(
+                        (String) r[0],
+                        r[1] != null ? new BigDecimal(r[1].toString()) : BigDecimal.ZERO))
+                .collect(Collectors.toList());
     }
 
     @Override

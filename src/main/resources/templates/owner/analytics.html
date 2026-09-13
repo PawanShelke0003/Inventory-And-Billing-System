@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: admin_layout('Owner Analytics', ~{::content})}" th:with="activeMenu='analytics'">
+<body>
+<div th:fragment="content">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header" style="margin-bottom: 24px;">
+        <div>
+            <div class="page-title">Business Analytics</div>
+            <div class="page-subtitle">Macro-level financial performance, inventory capital &amp; growth trends.</div>
+        </div>
+    </div>
+
+    <!-- ── DATE FILTER BAR ───────────────────────────────────────────── -->
+    <div style="background:#fff; border-radius:14px; padding:18px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid #f1f5f9; margin-bottom:24px;">
+        <form th:action="@{/owner/analytics}" method="get">
+            <div style="display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap;">
+                <div style="min-width:150px;">
+                    <label style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; display:block; margin-bottom:6px;">From Date</label>
+                    <input type="date" name="startDate" class="form-control" th:value="${startDate}">
+                </div>
+                <div style="min-width:150px;">
+                    <label style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; display:block; margin-bottom:6px;">To Date</label>
+                    <input type="date" name="endDate" class="form-control" th:value="${endDate}">
+                </div>
+                <div style="display:flex; gap:8px; padding-bottom:1px;">
+                    <button type="submit" class="btn btn-primary" style="height:40px; padding:0 22px; font-weight:600;">
+                        <i class="bi bi-funnel"></i> Apply
+                    </button>
+                    <a th:href="@{/owner/analytics}"
+                       style="height:40px; padding:0 14px; display:inline-flex; align-items:center; border:1px solid #d1d5db; border-radius:8px; font-size:13px; font-weight:600; color:#6b7280; text-decoration:none; background:#fff;">
+                        <i class="bi bi-x"></i> Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ── KPI CARDS ROW 1 ── Revenue ────────────────────────────────── -->
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:20px;">
+
+        <div style="background:linear-gradient(135deg,#10b981,#059669); border-radius:14px; padding:20px 22px; box-shadow:0 4px 14px rgba(16,185,129,0.25);">
+            <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:0.5px;">Total Revenue</div>
+            <div style="font-size:24px; font-weight:800; color:#fff; margin-top:6px;">
+                ₹ <span th:text="${totalRevenue != null ? totalRevenue : '0.00'}">0.00</span>
+            </div>
+            <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:4px;">Selected period</div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:14px; padding:20px 22px; box-shadow:0 4px 14px rgba(59,130,246,0.25);">
+            <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:0.5px;">This Month</div>
+            <div style="font-size:24px; font-weight:800; color:#fff; margin-top:6px;">
+                ₹ <span th:text="${thisMonthRevenue != null ? thisMonthRevenue : '0.00'}">0.00</span>
+            </div>
+            <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:4px;">vs Last: ₹ <span th:text="${lastMonthRevenue != null ? lastMonthRevenue : '0.00'}">0.00</span></div>
+        </div>
+
+        <!-- MoM Growth Card -->
+        <div th:with="isPositive=${momGrowth != null and momGrowth.compareTo(T(java.math.BigDecimal).ZERO) >= 0}"
+             th:style="|background:linear-gradient(135deg,${isPositive ? '#10b981,#059669' : '#ef4444,#dc2626'}); border-radius:14px; padding:20px 22px; box-shadow:0 4px 14px rgba(0,0,0,0.15);|">
+            <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:0.5px;">MoM Growth</div>
+            <div style="font-size:24px; font-weight:800; color:#fff; margin-top:6px;">
+                <span th:text="${momGrowth != null ? momGrowth : '0.00'}">0.00</span>%
+                <i th:class="${isPositive ? 'bi bi-arrow-up' : 'bi bi-arrow-down'}" style="font-size:18px;"></i>
+            </div>
+            <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:4px;">Month over Month</div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,#f97316,#ea580c); border-radius:14px; padding:20px 22px; box-shadow:0 4px 14px rgba(249,115,22,0.25);">
+            <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:0.5px;">Inventory Value</div>
+            <div style="font-size:24px; font-weight:800; color:#fff; margin-top:6px;">
+                ₹ <span th:text="${inventoryValue != null ? inventoryValue : '0.00'}">0.00</span>
+            </div>
+            <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:4px;">Active stock retail value</div>
+        </div>
+
+    </div>
+
+    <!-- ── KPI CARDS ROW 2 ── Bills & AOV ───────────────────────────── -->
+    <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-bottom:24px;">
+
+        <div style="background:#fff; border-radius:14px; padding:20px 24px; display:flex; align-items:center; gap:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+            <div style="width:52px; height:52px; background:#eff6ff; color:#3b82f6; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;">
+                <i class="bi bi-receipt"></i>
+            </div>
+            <div>
+                <div style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase;">Total Bills</div>
+                <div style="font-size:24px; font-weight:800; color:#1e293b; margin-top:2px;" th:text="${totalBills != null ? totalBills : 0}">0</div>
+            </div>
+        </div>
+
+        <div style="background:#fff; border-radius:14px; padding:20px 24px; display:flex; align-items:center; gap:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+            <div style="width:52px; height:52px; background:#f5f3ff; color:#8b5cf6; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <div>
+                <div style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase;">Avg Order Value</div>
+                <div style="font-size:24px; font-weight:800; color:#1e293b; margin-top:2px;">
+                    ₹ <span th:text="${averageOrder != null ? averageOrder : '0.00'}">0.00</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── CHARTS ROW 1: 12-Month Trend + Category Doughnut ──────────── -->
+    <div style="display:grid; grid-template-columns:2fr 1fr; gap:20px; margin-bottom:24px;">
+
+        <!-- Monthly Revenue Trend -->
+        <div style="background:#fff; border-radius:14px; padding:22px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+            <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:4px;">Monthly Revenue Trend</div>
+            <div style="font-size:12px; color:#9ca3af; margin-bottom:16px;">Revenue grouped by month for the selected range</div>
+            <canvas id="monthlyTrendChart" height="160"></canvas>
+        </div>
+
+        <!-- Category Revenue Doughnut -->
+        <div style="background:#fff; border-radius:14px; padding:22px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+            <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:4px;">Category Split</div>
+            <div style="font-size:12px; color:#9ca3af; margin-bottom:16px;">Revenue by product category</div>
+            <canvas id="ownerCategoryChart" height="220"></canvas>
+        </div>
+
+    </div>
+
+    <!-- ── CHARTS ROW 2: Staff Leaderboard + Top Products ────────────── -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
+
+        <!-- Staff Leaderboard Bar Chart -->
+        <div style="background:#fff; border-radius:14px; padding:22px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+            <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:4px;">Staff Performance</div>
+            <div style="font-size:12px; color:#9ca3af; margin-bottom:16px;">Revenue generated per staff member</div>
+            <canvas id="ownerStaffChart" height="220"></canvas>
+        </div>
+
+        <!-- Top Products Table -->
+        <div style="background:#fff; border-radius:14px; padding:22px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+            <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:4px;">Top Selling Products</div>
+            <div style="font-size:12px; color:#9ca3af; margin-bottom:16px;">Ranked by total quantity sold</div>
+            <table class="table" style="margin-bottom:0;">
+                <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th>Product</th>
+                    <th style="text-align:right;">Qty Sold</th>
+                </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="label, stat : ${productLabels}">
+                    <tr>
+                        <td style="color:#94a3b8; font-weight:600;" th:text="${stat.count}">1</td>
+                        <td style="font-weight:600;" th:text="${label}">Product</td>
+                        <td style="text-align:right;">
+                            <span style="background:#dcfce7; color:#166534; padding:3px 8px; border-radius:8px; font-size:12px; font-weight:700;"
+                                  th:text="${productValues[stat.index]}">0</span>
+                        </td>
+                    </tr>
+                </th:block>
+                <tr th:if="${productLabels == null or productLabels.isEmpty()}">
+                    <td colspan="3" style="text-align:center; color:#94a3b8; padding:30px 0;">No data for selected period.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- ── CHART.JS SCRIPTS ───────────────────────────────────────────── -->
+    <script th:inline="javascript">
+        const trendLabels   = /*[[${trendLabels}]]*/ [];
+        const trendValues   = /*[[${trendValues}]]*/ [];
+        const staffLabels   = /*[[${staffLabels}]]*/ [];
+        const staffValues   = /*[[${staffValues}]]*/ [];
+        const catLabels     = /*[[${categoryLabels}]]*/ [];
+        const catValues     = /*[[${categoryValues}]]*/ [];
+
+        // ── Line Chart: Monthly Revenue Trend ────────────────────────────
+        new Chart(document.getElementById('monthlyTrendChart'), {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: trendValues,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16,185,129,0.08)',
+                    borderWidth: 2.5,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#10b981',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { callback: v => '₹' + v } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // ── Doughnut Chart: Category Revenue ─────────────────────────────
+        new Chart(document.getElementById('ownerCategoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{
+                    data: catValues,
+                    backgroundColor: ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#06b6d4','#f97316'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '65%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 10, font: { size: 11 } } }
+                }
+            }
+        });
+
+        // ── Bar Chart: Staff Performance ──────────────────────────────────
+        new Chart(document.getElementById('ownerStaffChart'), {
+            type: 'bar',
+            data: {
+                labels: staffLabels,
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: staffValues,
+                    backgroundColor: ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#06b6d4'],
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { callback: v => '₹' + v } },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+    </script>
+
+</div>
+</body>
+</html>

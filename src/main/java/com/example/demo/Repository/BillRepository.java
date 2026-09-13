@@ -3,7 +3,6 @@ package com.example.demo.Repository;
 import com.example.demo.DTO.AnalyticsDTO;
 import com.example.demo.Models.Bill;
 import com.example.demo.Models.User;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,12 +13,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface BillRepository extends JpaRepository<Bill,Long> {
+public interface BillRepository extends JpaRepository<Bill, Long> {
 
-
-    List<Bill>findByCreatedByOrderByBillDateDesc(User user);
-    List<Bill>findTop5ByCreatedByOrderByBillDateDesc(User staff);
-    List<Bill>findAllByOrderByBillDateDesc();
+    List<Bill> findByCreatedByOrderByBillDateDesc(User user);
+    List<Bill> findTop5ByCreatedByOrderByBillDateDesc(User staff);
+    List<Bill> findAllByOrderByBillDateDesc();
 
     @Query("SELECT b FROM Bill b WHERE b.createdBy.id = :staffId " +
            "AND (:phone IS NULL OR :phone = '' OR b.customer.phone = :phone) " +
@@ -33,72 +31,98 @@ public interface BillRepository extends JpaRepository<Bill,Long> {
             @Param("endDate") LocalDateTime endDate
     );
 
-@Query("SELECT COALESCE(sum(b.grandTotal),0) FROM Bill b " +
-        "WHERE b.billDate >= :start AND b.billDate <= :end")
+    @Query("SELECT COALESCE(SUM(b.grandTotal), 0) FROM Bill b " +
+           "WHERE b.billDate >= :start AND b.billDate <= :end")
     BigDecimal findTotalRevenue(
-            @Param("start")LocalDateTime start,
-            @Param("end")LocalDateTime end
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
     );
-@Query("SELECT count(b) FROM Bill b "
-        + "WHERE b.billDate >= :start AND b.billDate <= :end")
-long countBillsBetween(
-        @Param("start")LocalDateTime start,
-        @Param("end")LocalDateTime end
-);
 
-@Query("SELECT new com.example.demo.DTO.AnalyticsDTO(b.createdBy.username , SUM(b.grandTotal)) " + "FROM Bill b " +
-        "WHERE b.billDate >= :start AND b.billDate <= :end "+"GROUP BY b.createdBy.username " +
-        "ORDER By SUM(b.grandTotal) DESC")
-List<AnalyticsDTO>findRevenuePerStaff(
-        @Param("start")LocalDateTime start,
-        @Param("end")LocalDateTime end
+    @Query("SELECT COUNT(b) FROM Bill b " +
+           "WHERE b.billDate >= :start AND b.billDate <= :end")
+    long countBillsBetween(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 
-);
+    @Query("SELECT new com.example.demo.DTO.AnalyticsDTO(b.createdBy.username, SUM(b.grandTotal)) " +
+           "FROM Bill b " +
+           "WHERE b.billDate >= :start AND b.billDate <= :end " +
+           "GROUP BY b.createdBy.username " +
+           "ORDER BY SUM(b.grandTotal) DESC")
+    List<AnalyticsDTO> findRevenuePerStaff(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 
-@Query("SELECT new com.example.demo.DTO.AnalyticsDTO("+
-        "FUNCTION('DATE_FORMAT',b.billDate,'%d %b'),sum(b.grandTotal)) "+
-        "FROM Bill b "+"WHERE b.billDate >= :start AND b.billDate <= :end "+
-        "GROUP BY FUNCTION ('DATE_FORMAT',b.billDate,'%d %b'),CAST(b.billDate AS date) "+
-        "ORDER BY CAST(b.billDate AS date)ASC")
-List<AnalyticsDTO>findDailyRevenueTrend(
-        @Param("start")LocalDateTime start,
-        @Param("end")LocalDateTime end
-);
+    @Query(value = "SELECT DATE_FORMAT(bill_date, '%d %b') as label, SUM(grand_total) as value " +
+                   "FROM bills WHERE bill_date >= :start AND bill_date <= :end " +
+                   "AND (:staffId IS NULL OR created_by = :staffId) " +
+                   "GROUP BY DATE_FORMAT(bill_date, '%d %b'), DATE(bill_date) " +
+                   "ORDER BY DATE(bill_date) ASC", nativeQuery = true)
+    List<Object[]> findDailyRevenueTrend(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("staffId") Long staffId
+    );
 
-@Query("SELECT new com.example.demo.DTO.AnalyticsDTO("+"FUNCTION('DATE_FORMAT',b.billDate,'%b %Y'),sum(b.grandTotal))"+
-        " FROM Bill b "+"WHERE b.billDate >= :start AND b.billDate <= :end "+
-        "GROUP BY FUNCTION('DATE_FORMAT',b.billDate,'%b %Y'), "+
-        "FUNCTION ('YEAR',b.billDate),FUNCTION('MONTH',b.billDate) "+
-        "ORDER BY FUNCTION('YEAR',b.billDate)ASC,FUNCTION('MONTH',b.billDate)ASC")
-List<AnalyticsDTO>findMonthlyRevenueTrend(
-        @Param("start")LocalDateTime start,
-        @Param("end")LocalDateTime end
-);
+    @Query(value = "SELECT DATE_FORMAT(bill_date, '%b %Y') as label, SUM(grand_total) as value " +
+                   "FROM bills WHERE bill_date >= :start AND bill_date <= :end " +
+                   "GROUP BY DATE_FORMAT(bill_date, '%b %Y'), YEAR(bill_date), MONTH(bill_date) " +
+                   "ORDER BY YEAR(bill_date) ASC, MONTH(bill_date) ASC", nativeQuery = true)
+    List<Object[]> findMonthlyRevenueTrend(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 
-@Query("SELECT COUNT(b) FROM Bill b "+
-        "WHERE b.createdBy.id = :staffId "+
-        "AND b.billDate >= :start AND b.billDate<=:end")
-long countBillsByStaffBetween(
-        @Param("staffId")Long staffId,
-        @Param("start")LocalDateTime start,
-        @Param("end")LocalDateTime end
-        );
+    @Query("SELECT COUNT(b) FROM Bill b " +
+           "WHERE b.createdBy.id = :staffId " +
+           "AND b.billDate >= :start AND b.billDate <= :end")
+    long countBillsByStaffBetween(
+            @Param("staffId") Long staffId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 
-@Query("SELECT COALESCE (sum(b.grandTotal),0) FROM Bill b "+
-        "WHERE b.createdBy.id=:staffId "+
-        "AND b.billDate >= :start AND b.billDate <= :end")
-BigDecimal findRevenueByStaffBetween(
-        @Param("staffId")Long staffId,
-        @Param("start")LocalDateTime start,
-        @Param("end")LocalDateTime end
-);
+    @Query("SELECT COALESCE(SUM(b.grandTotal), 0) FROM Bill b " +
+           "WHERE b.createdBy.id = :staffId " +
+           "AND b.billDate >= :start AND b.billDate <= :end")
+    BigDecimal findRevenueByStaffBetween(
+            @Param("staffId") Long staffId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 
-@Query("SELECT COALESCE(sum(b.grandTotal),0) FROM Bill b "+"WHERE FUNCTION('YEAR',b.billDate)=:year " +
-        "AND FUNCTION('MONTH',b.billDate) =:month")
-BigDecimal findRevenueByYearMonth(
-        @Param("year")int year,
-        @Param("month")int month
-);
+    @Query("SELECT COALESCE(SUM(b.grandTotal), 0) FROM Bill b " +
+           "WHERE year(b.billDate) = :year AND month(b.billDate) = :month")
+    BigDecimal findRevenueByYearMonth(
+            @Param("year") int year,
+            @Param("month") int month
+    );
+    @Query("SELECT COUNT(DISTINCT b) FROM Bill b JOIN b.items bi " +
+           "WHERE b.billDate >= :start AND b.billDate <= :end " +
+           "AND (:staffId IS NULL OR b.createdBy.id = :staffId) " +
+           "AND bi.product.category.id = :categoryId")
+    long countBillsByCategoryFilter(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("staffId") Long staffId,
+            @Param("categoryId") Long categoryId
+    );
 
-
+    @Query(value = "SELECT DATE_FORMAT(b.bill_date, '%d %b') as label, SUM(bi.total) as value " +
+                   "FROM bills b " +
+                   "JOIN bill_items bi ON b.id = bi.bill_id " +
+                   "JOIN products p ON bi.product_id = p.id " +
+                   "WHERE b.bill_date >= :start AND b.bill_date <= :end " +
+                   "AND (:staffId IS NULL OR b.created_by = :staffId) " +
+                   "AND p.category_id = :categoryId " +
+                   "GROUP BY DATE_FORMAT(b.bill_date, '%d %b'), DATE(b.bill_date) " +
+                   "ORDER BY DATE(b.bill_date) ASC", nativeQuery = true)
+    List<Object[]> findDailyRevenueTrendByCategory(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("staffId") Long staffId,
+            @Param("categoryId") Long categoryId
+    );
 }

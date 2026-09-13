@@ -47,24 +47,42 @@ public class AnalyticsController {
             Model model
             ){
 
-        if(startDate==null)startDate=LocalDate.now().withDayOfMonth(1);
-        if(endDate==null)endDate=LocalDate.now();
+        if (startDate == null) startDate = LocalDate.of(2000, 1, 1);
+        if (endDate == null)   endDate   = LocalDate.now();
 
-        model.addAttribute("totalRevenue",analyticsService.getTotalRevenue(startDate,endDate));
-        model.addAttribute("totalBills",analyticsService.getTotalBillCount(startDate,endDate));
-        model.addAttribute("averageOrder",analyticsService.getAverageOrderValue(startDate,endDate));
+        java.math.BigDecimal totalRevenue;
+        long totalBills;
+        java.math.BigDecimal averageOrder;
 
-        if(staffId!=null){
-            model.addAttribute("filteredStaffRevenue",analyticsService.getRevenueByStaff(staffId,startDate,endDate));
-            model.addAttribute("filteredStaffBills",analyticsService.getBillCountByStaff(staffId,startDate,endDate));
-            model.addAttribute("selectedStaffId",staffId);
+        if (categoryId != null) {
+            totalRevenue = analyticsService.getRevenueByCategoryFilter(startDate, endDate, staffId, categoryId);
+            totalBills = analyticsService.getBillCountByCategoryFilter(startDate, endDate, staffId, categoryId);
+        } else if (staffId != null) {
+            totalRevenue = analyticsService.getRevenueByStaff(staffId, startDate, endDate);
+            totalBills = analyticsService.getBillCountByStaff(staffId, startDate, endDate);
+        } else {
+            totalRevenue = analyticsService.getTotalRevenue(startDate, endDate);
+            totalBills = analyticsService.getTotalBillCount(startDate, endDate);
         }
+        averageOrder = totalBills == 0 ? java.math.BigDecimal.ZERO :
+                totalRevenue.divide(java.math.BigDecimal.valueOf(totalBills), 2, java.math.RoundingMode.HALF_UP);
+
+        model.addAttribute("totalRevenue", totalRevenue);
+        model.addAttribute("totalBills", totalBills);
+        model.addAttribute("averageOrder", averageOrder);
 
         List<AnalyticsDTO>staffLeaderboard=analyticsService.getStaffLeaderboard(startDate,endDate);
-        List<AnalyticsDTO>dailyTrend=analyticsService.getDailyRevenueTrend(startDate,endDate);
-        List<AnalyticsDTO>topProducts=analyticsService.geTopSellingProduct(startDate,endDate);
-        List<AnalyticsDTO>categoryRevenue=categoryId!=null?analyticsService.getTopSellingProductsByCategory(startDate,endDate,categoryId)
-                :analyticsService.getRevenueByCategory(startDate,endDate);
+        
+        List<AnalyticsDTO>dailyTrend = categoryId != null 
+                ? analyticsService.getDailyRevenueTrendByCategory(startDate, endDate, staffId, categoryId)
+                : analyticsService.getDailyRevenueTrend(startDate, endDate, staffId);
+                
+        List<AnalyticsDTO> topProducts = categoryId != null
+                ? analyticsService.getTopSellingProductsByCategory(startDate, endDate, categoryId, staffId)
+                : analyticsService.geTopSellingProduct(startDate, endDate, staffId);
+                
+        List<AnalyticsDTO>categoryRevenue=categoryId!=null?analyticsService.getTopSellingProductsByCategory(startDate,endDate,categoryId, staffId)
+                :analyticsService.getRevenueByCategory(startDate,endDate, staffId);
 
 
         model.addAttribute("staffLabels", toLabels(staffLeaderboard));
@@ -82,6 +100,7 @@ public class AnalyticsController {
         model.addAttribute("startDate",startDate);
         model.addAttribute("endDate",endDate);
         model.addAttribute("categoryId",categoryId);
+        model.addAttribute("selectedStaffId",staffId);
 
         return "admin/analytics";
     }
@@ -93,8 +112,8 @@ public class AnalyticsController {
             Model model
     ){
 
-        if(startDate==null)startDate=LocalDate.now().minusMonths(11).withDayOfMonth(1);
-        if(endDate==null)endDate=LocalDate.now();
+        if (startDate == null) startDate = LocalDate.of(2000, 1, 1);
+        if (endDate == null)   endDate   = LocalDate.now();
 
         LocalDate now = LocalDate.now();
 
@@ -108,8 +127,8 @@ public class AnalyticsController {
 
         List<AnalyticsDTO>monthlyTrend=analyticsService.getMonthlyRevenueTrend(startDate,endDate);
         List<AnalyticsDTO>staffLeaderboard=analyticsService.getStaffLeaderboard(startDate,endDate);
-        List<AnalyticsDTO>categoryRevenue=analyticsService.getRevenueByCategory(startDate,endDate);
-        List<AnalyticsDTO>topProducts=analyticsService.geTopSellingProduct(startDate,endDate);
+        List<AnalyticsDTO>categoryRevenue=analyticsService.getRevenueByCategory(startDate,endDate, null);
+        List<AnalyticsDTO>topProducts=analyticsService.geTopSellingProduct(startDate,endDate, null);
 
         model.addAttribute("trendLabels",toLabels(monthlyTrend));
         model.addAttribute("trendValues",toValues(monthlyTrend));

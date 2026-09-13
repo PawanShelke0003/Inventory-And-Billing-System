@@ -121,26 +121,23 @@ public class BillingServiceImpl implements BillingService {
     @Override
     public List<Bill> getStaffsBillsWithFilters(Long staffId, String phone, LocalDate startDate, LocalDate endDate) {
 
-        if(startDate==null&&endDate==null&&phone==null||(phone.trim().isEmpty())){
-            startDate = LocalDate.now();
-            endDate=LocalDate.now();
+        boolean phoneEmpty = (phone == null || phone.trim().isEmpty());
+
+        if (startDate == null && endDate == null && phoneEmpty) {
+            startDate = LocalDate.of(2000, 1, 1);
+            endDate   = LocalDate.now();
         }
 
-        LocalDateTime startDateTime = null;
-        LocalDateTime endDateTime = null;
+        LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime   = (endDate   != null) ? endDate.atTime(23, 59, 59) : null;
 
-        if(startDate!=null){
-            startDateTime = startDate.atStartOfDay();
-        }
-        if(endDate!=null){
-            endDateTime=endDate.atTime(23,59,59);
-        }
-        if(phone!=null&&phone.trim().isEmpty()){
+        if (!phoneEmpty) {
+            phone = phone.trim();
+        } else {
             phone = null;
         }
 
-
-        return billRepo.findStaffBillsWithFilters(staffId,phone,startDateTime,endDateTime);
+        return billRepo.findStaffBillsWithFilters(staffId, phone, startDateTime, endDateTime);
     }
 
     @Override
