@@ -20,4 +20,5 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     @Query("SELECT COALESCE(SUM(p.price * p.quantity),0) FROM Product p WHERE p.active = true")
     BigDecimal findTotalInventoryValue();
 
+    List<Product> findByActiveTrueOrderByCategoryNameAscNameAsc();
 }

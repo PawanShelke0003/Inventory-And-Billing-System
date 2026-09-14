@@ -175,7 +175,7 @@
             <div class="icon-container">
                 <i class="bi bi-box-seam"></i>
             </div>
-            <h3>Welcome Back</h3>
+            <h3 th:text="${globalSettings != null ? globalSettings.storeName : 'Inventory System'}">Welcome Back</h3>
             <p>Please enter your details to sign in.</p>
         </div>
 
@@ -205,12 +205,17 @@
             <!-- Password -->
             <div style="margin-bottom: 24px;">
                 <label class="form-label">Password</label>
-                <input type="password"
-                       name="password"
-                       class="form-control"
-                       placeholder="Enter your password"
-                       required
-                       autocomplete="current-password">
+                <div style="position: relative;">
+                    <input type="password"
+                           id="loginPassword"
+                           name="password"
+                           class="form-control"
+                           placeholder="Enter your password"
+                           style="padding-right: 40px;"
+                           required
+                           autocomplete="current-password">
+                    <i class="bi bi-eye-slash" style="position: absolute; right: 12px; top: 13px; cursor: pointer; font-size: 18px; color: #6b7280;" onclick="togglePasswordVisibility('loginPassword', this)"></i>
+                </div>
             </div>
 
             <!-- Submit -->
@@ -222,10 +227,25 @@
 
     <!-- Footer -->
     <div class="footer-text">
-        © 2026 Inventory & Billing System. All rights reserved.
+        &copy; 2026 Inventory & Billing System. All rights reserved.
     </div>
 
 </div>
+
+<script>
+    function togglePasswordVisibility(inputId, icon) {
+        var input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+        } else {
+            input.type = "password";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+        }
+    }
+</script>
 
 </body>
 </html>

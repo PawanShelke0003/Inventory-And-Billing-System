@@ -165,7 +165,7 @@
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <div class="topbar-title">Inventory Billing System</div>
+  <div class="topbar-title" th:text="${globalSettings != null ? globalSettings.storeName : 'Inventory Billing System'}">Inventory Billing System</div>
 
   <form th:action="@{/logout}" method="post">
     <button class="btn btn-outline-light btn-sm">

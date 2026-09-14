@@ -4,7 +4,52 @@
 <body>
 <div th:fragment="content">
     
-    <div class="page-header">
+    <style>
+        .invoice-card { background: #fff; padding: 50px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); color: #111827; }
+        
+        /* Header */
+        .inv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
+        .store-brand h2 { font-weight: 800; font-size: 28px; margin-bottom: 5px; color: #111827; letter-spacing: -0.5px; }
+        .store-info { color: #4b5563; font-size: 14px; line-height: 1.5; }
+        
+        .inv-title-box { text-align: right; }
+        .inv-title { font-size: 32px; font-weight: 800; color: #e5e7eb; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .inv-meta { font-size: 14px; color: #4b5563; }
+        .inv-meta span { font-weight: 600; color: #111827; }
+        
+        /* Customer Box */
+        .customer-box { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; }
+        .customer-details h6 { font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .customer-details .c-name { font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+        .customer-details .c-phone { color: #4b5563; font-size: 14px; }
+        
+        /* Table */
+        .inv-table th { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 15px; border: none; }
+        .inv-table td { padding: 15px; font-size: 14px; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
+        .inv-table .product-name { font-weight: 600; color: #111827; }
+        
+        /* Summary */
+        .summary-section { display: flex; justify-content: space-between; margin-top: 30px; page-break-inside: avoid; }
+        
+        .footer-notes { flex: 1; padding-right: 40px; }
+        .terms-text { font-size: 12px; color: #6b7280; white-space: pre-wrap; line-height: 1.5; }
+        
+        .totals-box { width: 300px; }
+        .total-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; color: #4b5563; }
+        .total-row.grand { border-top: 2px solid #111827; margin-top: 10px; padding-top: 15px; font-size: 20px; font-weight: 800; color: #10b981; }
+        
+        @media print {
+            body, .content-wrapper, .main-content { background: white !important; margin: 0 !important; padding: 0 !important; }
+            .sidebar, .topbar, .page-header { display: none !important; }
+            .invoice-card { padding: 0 !important; box-shadow: none !important; border: none !important; }
+            .customer-box { background-color: white !important; border: 1px solid #000; }
+            .inv-table th { background-color: white !important; border-bottom: 2px solid #000; color: #000; }
+            .inv-title { color: #000 !important; -webkit-print-color-adjust: exact; }
+            .badge { border: 1px solid #000 !important; color: #000 !important; }
+        }
+    </style>
+
+    <div class="page-header d-print-none">
         <div>
             <div class="page-title">Invoice Details</div>
             <div class="page-subtitle">View and print bill record</div>
@@ -15,48 +60,89 @@
         </div>
     </div>
 
-    <div class="form-container" style="max-width: 800px; margin: 0 auto;">
-        <h4 class="text-center" style="font-weight: 700; color: #111827; margin-bottom: 20px;">INVOICE</h4>
-        <hr style="border-color: #e5e7eb; margin-bottom: 20px;">
-
-        <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
-            <div>
-                <p style="margin-bottom: 5px;"><b>Bill ID:</b> <span th:text="${bill.id}"></span></p>
-                <p style="margin-bottom: 5px;"><b>Date:</b> <span th:text="${#temporals.format(bill.billDate,'dd-MM-yyyy hh:mm a')}"></span></p>
-                <p style="margin-bottom: 5px;"><b>Staff:</b> <span th:text="${bill.createdBy.username}"></span></p>
+    <!-- PRINTABLE INVOICE -->
+    <div class="invoice-card" style="max-width: 850px; margin: 0 auto;">
+        
+        <!-- HEADER -->
+        <div class="inv-header">
+            <div class="store-brand">
+                <h2 th:text="${settings != null ? settings.storeName : 'Store Name'}">Store Name</h2>
+                <div class="store-info">
+                    <div th:text="${settings != null ? settings.address : 'Store Address'}" style="white-space: pre-wrap; margin-bottom: 4px;"></div>
+                    <div><i class="bi bi-telephone-fill me-1"></i> <span th:text="${settings != null ? settings.phone : ''}"></span></div>
+                    <div th:if="${settings != null && settings.gstin != null && !settings.gstin.isEmpty()}">
+                        <b>GSTIN:</b> <span th:text="${settings.gstin}"></span>
+                    </div>
+                </div>
             </div>
-            <div style="text-align: right;">
-                <p style="margin-bottom: 5px;"><b>Customer:</b> <span th:text="${bill.customer.name}"></span></p>
-                <p style="margin-bottom: 5px;"><b>Phone:</b> <span th:text="${bill.customer.phone}"></span></p>
+            <div class="inv-title-box">
+                <div class="inv-title">TAX INVOICE</div>
+                <div class="inv-meta mb-1">Invoice No: <span>#INV-<span th:text="${bill.id}"></span></span></div>
+                <div class="inv-meta mb-1">Date: <span th:text="${#temporals.format(bill.billDate,'dd MMM yyyy, hh:mm a')}"></span></div>
+                <div class="inv-meta">Cashier: <span th:text="${bill.createdBy.username}"></span></div>
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
+        <!-- CUSTOMER -->
+        <div class="customer-box">
+            <div class="customer-details">
+                <h6>Billed To</h6>
+                <div class="c-name" th:text="${bill.customer.name}">Customer Name</div>
+                <div class="c-phone"><i class="bi bi-telephone me-1"></i> <span th:text="${bill.customer.phone}"></span></div>
+            </div>
+            <div class="text-end" style="align-self: flex-end;">
+                <span class="badge bg-success bg-opacity-10 text-success border border-success" style="padding: 8px 12px; font-size: 13px;">
+                    <i class="bi bi-check-circle-fill me-1"></i> PAID
+                </span>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <table class="table inv-table mb-0">
+            <thead>
                 <tr>
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Qty</th>
-                    <th style="text-align: right;">Total</th>
+                    <th style="width: 5%">#</th>
+                    <th style="width: 45%">Item Description</th>
+                    <th class="text-center" style="width: 15%">Price</th>
+                    <th class="text-center" style="width: 15%">Qty</th>
+                    <th class="text-end" style="width: 20%">Total</th>
                 </tr>
-                </thead>
-                <tbody>
-                <tr th:each="i : ${items}">
-                    <td th:text="${i.product.name}" style="font-weight: 600;"></td>
-                    <td th:text="${i.price}"></td>
-                    <td th:text="${i.quantity}"></td>
-                    <td th:text="${i.total}" style="text-align: right;"></td>
+            </thead>
+            <tbody>
+                <tr th:each="i, stat : ${items}">
+                    <td th:text="${stat.index + 1}" style="color: #6b7280;">1</td>
+                    <td class="product-name" th:text="${i.product.name}">Product Name</td>
+                    <td class="text-center">₹<span th:text="${i.price}"></span></td>
+                    <td class="text-center fw-bold" th:text="${i.quantity}"></td>
+                    <td class="text-end fw-bold">₹<span th:text="${i.total}"></span></td>
                 </tr>
-                </tbody>
-            </table>
+            </tbody>
+        </table>
+
+        <!-- SUMMARY -->
+        <div class="summary-section">
+            <div class="footer-notes">
+                <div class="terms-text" th:if="${settings != null}" th:text="${settings.receiptFooter}"></div>
+                <div class="terms-text mt-2">
+                    <strong>No refund policy. Check before purchasing.</strong>
+                </div>
+            </div>
+            <div class="totals-box">
+                <div class="total-row">
+                    <span>Subtotal</span>
+                    <span class="fw-bold text-dark">₹<span th:text="${bill.totalAmount}"></span></span>
+                </div>
+                <div class="total-row">
+                    <span>GST (<span th:text="${settings != null ? (settings.gstRate * 100) : '18.0'}"></span>%)</span>
+                    <span class="fw-bold text-dark">₹<span th:text="${bill.gstAmount}"></span></span>
+                </div>
+                <div class="total-row grand">
+                    <span>Grand Total</span>
+                    <span>₹<span th:text="${bill.grandTotal}"></span></span>
+                </div>
+            </div>
         </div>
 
-        <div style="text-align: right; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-            <p style="margin-bottom: 5px; color: #6b7280;">Subtotal: <b style="color: #111827;" th:text="${bill.totalAmount}"></b></p>
-            <p style="margin-bottom: 5px; color: #6b7280;">GST (18%): <b style="color: #111827;" th:text="${bill.gstAmount}"></b></p>
-            <h4 style="margin-top: 10px; color: #10b981; font-weight: 700;">Grand Total: ₹<span th:text="${bill.grandTotal}"></span></h4>
-        </div>
     </div>
 
 </div>

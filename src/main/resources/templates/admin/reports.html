@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: admin_layout('Reports | Inventory System', ~{::content})}">
+<th:block th:fragment="content">
+<div>
+
+    <!-- ── PAGE HEADER ──────────────────────────────────────────────────── -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
+        <div>
+            <div style="font-size:24px; font-weight:800; color:#111827;">Reports</div>
+            <div style="font-size:14px; color:#6b7280; margin-top:4px;">
+                Generate detailed reports and export as PDF or CSV
+            </div>
+        </div>
+        <!-- Export buttons — visible only after a report is generated -->
+        <div th:if="${reportType != null}" style="display:flex; gap:10px;">
+            <a th:href="@{/admin/reports/export(format='csv',
+                          type=${reportType},
+                          startDate=${startDate},
+                          endDate=${endDate},
+                          staffId=${staffId},
+                          categoryId=${categoryId})}"
+               style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px;
+                      background:#059669; color:#fff; border-radius:10px; text-decoration:none;
+                      font-weight:600; font-size:14px;">
+                <i class="bi bi-filetype-csv"></i> Download CSV
+            </a>
+            <a th:href="@{/admin/reports/export(format='pdf',
+                          type=${reportType},
+                          startDate=${startDate},
+                          endDate=${endDate},
+                          staffId=${staffId},
+                          categoryId=${categoryId})}"
+               style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px;
+                      background:#dc2626; color:#fff; border-radius:10px; text-decoration:none;
+                      font-weight:600; font-size:14px;">
+                <i class="bi bi-filetype-pdf"></i> Download PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- ── FILTER / CONTROL PANEL ──────────────────────────────────────── -->
+    <div style="background:#fff; border-radius:16px; padding:24px; box-shadow:0 2px 8px rgba(0,0,0,0.05);
+                border:1px solid #f1f5f9; margin-bottom:24px;">
+        <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:16px;">
+            <i class="bi bi-sliders" style="color:#3b82f6; margin-right:6px;"></i>Configure Report
+        </div>
+        <form th:action="@{/admin/reports/generate}" method="get">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr auto; gap:16px; align-items:end;">
+
+                <!-- Report Type -->
+                <div>
+                    <label style="font-size:12px; font-weight:600; color:#374151;
+                                  text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">
+                        Report Type
+                    </label>
+                    <select name="type" id="reportTypeSelect" onchange="toggleFilters()"
+                            style="width:100%; padding:10px 12px; border:1px solid #e2e8f0;
+                                   border-radius:8px; font-size:14px; background:#f8fafc; color:#111827;">
+                        <option value="sales"             th:selected="${reportType == 'sales'}">Detailed Sales</option>
+                        <option value="itemized"          th:selected="${reportType == 'itemized'}">Itemized Sales</option>
+                        <option value="staff_performance" th:selected="${reportType == 'staff_performance'}">Staff Performance</option>
+                        <option value="category_summary"  th:selected="${reportType == 'category_summary'}">Category-Wise Sales</option>
+                        <option value="tax"               th:selected="${reportType == 'tax'}">GST / Tax Summary</option>
+                        <option value="inventory"         th:selected="${reportType == 'inventory'}">Inventory Value</option>
+                    </select>
+                </div>
+
+                <!-- Quick Date Range -->
+                <div id="quickRangeWrap">
+                    <label style="font-size:12px; font-weight:600; color:#374151;
+                                  text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">
+                        Quick Range
+                    </label>
+                    <select id="quickRangeSelect" onchange="applyQuickRange()"
+                            style="width:100%; padding:10px 12px; border:1px solid #e2e8f0;
+                                   border-radius:8px; font-size:14px; background:#f8fafc; color:#111827;">
+                        <option value="custom">Custom</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="this_week">This Week</option>
+                        <option value="this_month">This Month</option>
+                        <option value="last_month">Last Month</option>
+                        <option value="this_year">This Year</option>
+                        <option value="all_time">All Time</option>
+                    </select>
+                </div>
+
+                <!-- Start Date -->
+                <div id="startDateWrap">
+                    <label style="font-size:12px; font-weight:600; color:#374151;
+                                  text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">
+                        From
+                    </label>
+                    <input type="date" name="startDate" id="startDateInput"
+                           th:value="${startDate != null && startDate.year != 2000 ? startDate : ''}"
+                           style="width:100%; padding:10px 12px; border:1px solid #e2e8f0;
+                                  border-radius:8px; font-size:14px; background:#f8fafc; color:#111827; box-sizing:border-box;">
+                </div>
+
+                <!-- End Date -->
+                <div id="endDateWrap">
+                    <label style="font-size:12px; font-weight:600; color:#374151;
+                                  text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">
+                        To
+                    </label>
+                    <input type="date" name="endDate" id="endDateInput"
+                           th:value="${endDate}"
+                           style="width:100%; padding:10px 12px; border:1px solid #e2e8f0;
+                                  border-radius:8px; font-size:14px; background:#f8fafc; color:#111827; box-sizing:border-box;">
+                </div>
+
+                <!-- Staff Filter -->
+                <div id="staffWrap">
+                    <label style="font-size:12px; font-weight:600; color:#374151;
+                                  text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">
+                        Staff
+                    </label>
+                    <select name="staffId"
+                            style="width:100%; padding:10px 12px; border:1px solid #e2e8f0;
+                                   border-radius:8px; font-size:14px; background:#f8fafc; color:#111827;">
+                        <option value="">All Staff</option>
+                        <option th:each="s : ${allStaff}"
+                                th:value="${s.id}"
+                                th:text="${s.username}"
+                                th:selected="${staffId != null && staffId == s.id}">Staff</option>
+                    </select>
+                </div>
+
+                <!-- Generate Button -->
+                <div>
+                    <button type="submit"
+                            style="width:100%; padding:10px 20px; background:linear-gradient(135deg,#2563eb,#1d4ed8);
+                                   color:#fff; border:none; border-radius:8px; font-weight:700;
+                                   font-size:14px; cursor:pointer; display:flex; align-items:center;
+                                   justify-content:center; gap:8px;">
+                        <i class="bi bi-play-fill"></i> Generate
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Category filter row -->
+            <div id="categoryWrap" style="margin-top:16px; display:none;">
+                <label style="font-size:12px; font-weight:600; color:#374151;
+                              text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">
+                    Category
+                </label>
+                <select name="categoryId"
+                        style="width:260px; padding:10px 12px; border:1px solid #e2e8f0;
+                               border-radius:8px; font-size:14px; background:#f8fafc; color:#111827;">
+                    <option value="">All Categories</option>
+                    <option th:each="c : ${allCategories}"
+                            th:value="${c.id}"
+                            th:text="${c.name}"
+                            th:selected="${categoryId != null && categoryId == c.id}">Category</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- ── SUMMARY CARDS (shown only after generation) ─────────────────── -->
+    <div th:if="${rows != null}" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px;">
+
+        <!-- Sales / Itemized summary -->
+        <th:block th:if="${reportType == 'sales' or reportType == 'itemized'}">
+            <div style="background:linear-gradient(135deg,#10b981,#059669); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(16,185,129,0.25);">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">Total Revenue</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;">
+                        &#8377; <span th:text="${#aggregates.sum(rows.![grandTotal])}">0.00</span>
+                    </div>
+                </div>
+                <i class="bi bi-currency-rupee" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+            <div style="background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(59,130,246,0.25);">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">Total Rows</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;"
+                         th:text="${rows.size()}">0</div>
+                </div>
+                <i class="bi bi-list-ol" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+            <div style="background:linear-gradient(135deg,#8b5cf6,#7c3aed); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(139,92,246,0.25);">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">Total GST</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;">
+                        &#8377; <span th:text="${#aggregates.sum(rows.![gstAmount])}">0.00</span>
+                    </div>
+                </div>
+                <i class="bi bi-percent" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+        </th:block>
+
+        <!-- Tax summary -->
+        <th:block th:if="${reportType == 'tax'}">
+            <div style="background:linear-gradient(135deg,#10b981,#059669); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(16,185,129,0.25);">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">Grand Total</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;">
+                        &#8377; <span th:text="${#aggregates.sum(rows.![grandTotal])}">0.00</span>
+                    </div>
+                </div>
+                <i class="bi bi-currency-rupee" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+            <div style="background:linear-gradient(135deg,#f59e0b,#d97706); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(245,158,11,0.25);">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">Total GST Collected</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;">
+                        &#8377; <span th:text="${#aggregates.sum(rows.![gstAmount])}">0.00</span>
+                    </div>
+                </div>
+                <i class="bi bi-percent" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+            <div style="background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(59,130,246,0.25);">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">Days Covered</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;"
+                         th:text="${rows.size()}">0</div>
+                </div>
+                <i class="bi bi-calendar3" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+        </th:block>
+
+        <!-- Inventory summary -->
+        <th:block th:if="${reportType == 'inventory'}">
+            <div style="background:linear-gradient(135deg,#10b981,#059669); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(16,185,129,0.25);">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">Total Stock Value</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;">
+                        &#8377; <span th:text="${#aggregates.sum(rows.![totalStockValue])}">0.00</span>
+                    </div>
+                </div>
+                <i class="bi bi-boxes" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+            <div style="background:linear-gradient(135deg,#dc2626,#b91c1c); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(220,38,38,0.25);">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">Out of Stock</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;"
+                         th:text="${rows.?[stockStatus == 'OUT'].size()}">0</div>
+                </div>
+                <i class="bi bi-x-circle" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+            <div style="background:linear-gradient(135deg,#f59e0b,#d97706); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(245,158,11,0.25);">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">Low Stock</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;"
+                         th:text="${rows.?[stockStatus == 'LOW'].size()}">0</div>
+                </div>
+                <i class="bi bi-exclamation-triangle" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+        </th:block>
+
+        <!-- Staff Performance / Category Summary summary -->
+        <th:block th:if="${reportType == 'staff_performance' or reportType == 'category_summary'}">
+            <div style="background:linear-gradient(135deg,#10b981,#059669); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(16,185,129,0.25);">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">Total Revenue</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;">
+                        &#8377; <span th:text="${#aggregates.sum(rows.![totalRevenue])}">0.00</span>
+                    </div>
+                </div>
+                <i class="bi bi-currency-rupee" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+            <div style="background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(59,130,246,0.25);">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;"
+                         th:text="${reportType == 'staff_performance' ? 'Total Staff' : 'Total Categories'}">Total Rows</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;"
+                         th:text="${rows.size()}">0</div>
+                </div>
+                <i class="bi bi-list-ol" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+            <div style="background:linear-gradient(135deg,#8b5cf6,#7c3aed); border-radius:14px;
+                        padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+                        box-shadow:0 4px 14px rgba(139,92,246,0.25);">
+                <div th:if="${reportType == 'staff_performance'}">
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">Items Sold</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;">
+                         <span th:text="${#aggregates.sum(rows.![itemsSold])}">0</span>
+                    </div>
+                </div>
+                <div th:if="${reportType == 'category_summary'}">
+                    <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.75);
+                                text-transform:uppercase; letter-spacing:0.5px;">GST Collected</div>
+                    <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;">
+                        &#8377; <span th:text="${#aggregates.sum(rows.![gstCollected])}">0.00</span>
+                    </div>
+                </div>
+                <i class="bi bi-graph-up" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+            </div>
+        </th:block>
+
+    </div>
+
+    <!-- ── DATA TABLE ────────────────────────────────────────────────────── -->
+    <div th:if="${rows != null}"
+         style="background:#fff; border-radius:16px; padding:24px;
+                box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+
+        <!-- Table header row -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div>
+                <div style="font-size:15px; font-weight:700; color:#111827;"
+                     th:text="${reportType == 'sales' ? 'Detailed Sales Report' :
+                                reportType == 'itemized' ? 'Itemized Sales Report' :
+                                reportType == 'tax' ? 'GST / Tax Summary Report' :
+                                reportType == 'staff_performance' ? 'Staff Performance Report' :
+                                reportType == 'category_summary' ? (categoryId != null ? 'Product-Wise Sales Report' : 'Category-Wise Sales Report') :
+                                'Inventory Value Report'}">Report</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">
+                    <span th:text="${rows.size() + ' row(s) found'}">0 rows</span>
+                    <span th:if="${(reportType == 'category_summary' or reportType == 'itemized' or reportType == 'sales') and staffId != null}"
+                          style="background:#f3e8ff; color:#7c3aed; padding:2px 6px; border-radius:4px; margin-left:8px; font-weight:600;">
+                        Filtered by Staff
+                    </span>
+                    <span th:if="${(reportType == 'category_summary' or reportType == 'itemized' or reportType == 'staff_performance') and categoryId != null}"
+                          style="background:#dbeafe; color:#2563eb; padding:2px 6px; border-radius:4px; margin-left:8px; font-weight:600;">
+                        Filtered by Category
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+
+            <!-- SALES TABLE -->
+            <table th:if="${reportType == 'sales'}" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f8fafc;">
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b;
+                                   text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:left;">#</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b;
+                                   text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:left;">Bill ID</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b;
+                                   text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:left;">Date &amp; Time</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b;
+                                   text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:left;">Staff</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b;
+                                   text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:left;">Customer</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b;
+                                   text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Sub-Total</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b;
+                                   text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">GST</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b;
+                                   text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Grand Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r, stat : ${rows}"
+                        th:style="${stat.odd ? 'background:#fff;' : 'background:#f8fafc;'}">
+                        <td style="padding:12px 14px; font-size:13px; color:#9ca3af; border-bottom:1px solid #f1f5f9;"
+                            th:text="${stat.count}">1</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #f1f5f9;">
+                            <span style="background:#dbeafe; color:#1d4ed8; padding:3px 8px; border-radius:6px;
+                                         font-size:12px; font-weight:700;" th:text="'#INV-' + ${r.billId}">#INV-1</span>
+                        </td>
+                        <td style="padding:12px 14px; font-size:13px; color:#374151; border-bottom:1px solid #f1f5f9;"
+                            th:text="${#temporals.format(r.billDate, 'dd MMM yyyy hh:mm a')}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; font-weight:600; color:#111827; border-bottom:1px solid #f1f5f9;"
+                            th:text="${r.staffName}">Staff</td>
+                        <td style="padding:12px 14px; font-size:13px; color:#374151; border-bottom:1px solid #f1f5f9;"
+                            th:text="${r.customerPhone}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; color:#374151; text-align:right; border-bottom:1px solid #f1f5f9;"
+                            th:text="'₹' + ${r.totalAmount}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; color:#f59e0b; font-weight:600; text-align:right; border-bottom:1px solid #f1f5f9;"
+                            th:text="'₹' + ${r.gstAmount}">-</td>
+                        <td style="padding:12px 14px; font-size:14px; font-weight:700; color:#059669; text-align:right; border-bottom:1px solid #f1f5f9;"
+                            th:text="'₹' + ${r.grandTotal}">-</td>
+                    </tr>
+                    <tr th:if="${rows.isEmpty()}">
+                        <td colspan="8" style="padding:48px; text-align:center; color:#9ca3af; font-size:14px;">
+                            <i class="bi bi-inbox" style="font-size:32px; display:block; margin-bottom:8px;"></i>
+                            No data found for selected filters.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ITEMIZED TABLE -->
+            <table th:if="${reportType == 'itemized'}" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f8fafc;">
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">Bill ID</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">Date</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">Staff</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">Product</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">Category</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Qty</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Unit Price</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r, stat : ${rows}"
+                        th:style="${stat.odd ? 'background:#fff;' : 'background:#f8fafc;'}">
+                        <td style="padding:12px 14px; border-bottom:1px solid #f1f5f9;">
+                            <span style="background:#dbeafe; color:#1d4ed8; padding:3px 8px; border-radius:6px;
+                                         font-size:12px; font-weight:700;" th:text="'#INV-' + ${r.billId}">#INV-1</span>
+                        </td>
+                        <td style="padding:12px 14px; font-size:13px; color:#374151; border-bottom:1px solid #f1f5f9;"
+                            th:text="${#temporals.format(r.billDate, 'dd MMM yyyy hh:mm a')}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; font-weight:600; color:#111827; border-bottom:1px solid #f1f5f9;"
+                            th:text="${r.staffName}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; color:#111827; border-bottom:1px solid #f1f5f9;"
+                            th:text="${r.productName}">-</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #f1f5f9;">
+                            <span style="background:#f3e8ff; color:#7c3aed; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;"
+                                  th:text="${r.categoryName}">-</span>
+                        </td>
+                        <td style="padding:12px 14px; font-size:13px; font-weight:700; text-align:right; color:#374151; border-bottom:1px solid #f1f5f9;"
+                            th:text="${r.quantity}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; text-align:right; color:#374151; border-bottom:1px solid #f1f5f9;"
+                            th:text="'₹' + ${r.unitPrice}">-</td>
+                        <td style="padding:12px 14px; font-size:14px; font-weight:700; color:#059669; text-align:right; border-bottom:1px solid #f1f5f9;"
+                            th:text="'₹' + ${r.itemTotal}">-</td>
+                    </tr>
+                    <tr th:if="${rows.isEmpty()}">
+                        <td colspan="8" style="padding:48px; text-align:center; color:#9ca3af; font-size:14px;">
+                            <i class="bi bi-inbox" style="font-size:32px; display:block; margin-bottom:8px;"></i>
+                            No data found for selected filters.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- TAX TABLE -->
+            <table th:if="${reportType == 'tax'}" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f8fafc;">
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">#</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">Date</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Bills</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Sub-Total</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">GST Collected</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Grand Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r, stat : ${rows}"
+                        th:style="${stat.odd ? 'background:#fff;' : 'background:#f8fafc;'}">
+                        <td style="padding:12px 14px; font-size:13px; color:#9ca3af; border-bottom:1px solid #f1f5f9;"
+                            th:text="${stat.count}">1</td>
+                        <td style="padding:12px 14px; font-size:13px; font-weight:600; color:#111827; border-bottom:1px solid #f1f5f9;"
+                            th:text="${r.period}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; text-align:right; color:#374151; border-bottom:1px solid #f1f5f9;"
+                            th:text="${r.billCount}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; text-align:right; color:#374151; border-bottom:1px solid #f1f5f9;"
+                            th:text="'₹' + ${r.totalAmount}">-</td>
+                        <td style="padding:12px 14px; font-size:14px; font-weight:700; color:#f59e0b; text-align:right; border-bottom:1px solid #f1f5f9;"
+                            th:text="'₹' + ${r.gstAmount}">-</td>
+                        <td style="padding:12px 14px; font-size:14px; font-weight:700; color:#059669; text-align:right; border-bottom:1px solid #f1f5f9;"
+                            th:text="'₹' + ${r.grandTotal}">-</td>
+                    </tr>
+                    <tr th:if="${rows.isEmpty()}">
+                        <td colspan="6" style="padding:48px; text-align:center; color:#9ca3af; font-size:14px;">
+                            <i class="bi bi-inbox" style="font-size:32px; display:block; margin-bottom:8px;"></i>
+                            No data found for selected period.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- INVENTORY TABLE -->
+            <table th:if="${reportType == 'inventory'}" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f8fafc;">
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">#</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">Product</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">Category</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Stock</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Min Stock</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Unit Price</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Stock Value</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r, stat : ${rows}"
+                        th:style="${stat.odd ? 'background:#fff;' : 'background:#f8fafc;'}">
+                        <td style="padding:12px 14px; font-size:13px; color:#9ca3af; border-bottom:1px solid #f1f5f9;"
+                            th:text="${stat.count}">1</td>
+                        <td style="padding:12px 14px; font-size:13px; font-weight:600; color:#111827; border-bottom:1px solid #f1f5f9;"
+                            th:text="${r.productName}">-</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #f1f5f9;">
+                            <span style="background:#f3e8ff; color:#7c3aed; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;"
+                                  th:text="${r.categoryName}">-</span>
+                        </td>
+                        <td style="padding:12px 14px; font-size:13px; font-weight:700; text-align:right; border-bottom:1px solid #f1f5f9;"
+                            th:text="${r.currentStock}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; text-align:right; color:#9ca3af; border-bottom:1px solid #f1f5f9;"
+                            th:text="${r.minStock}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; text-align:right; color:#374151; border-bottom:1px solid #f1f5f9;"
+                            th:text="'₹' + ${r.unitPrice}">-</td>
+                        <td style="padding:12px 14px; font-size:14px; font-weight:700; color:#059669; text-align:right; border-bottom:1px solid #f1f5f9;"
+                            th:text="'₹' + ${r.totalStockValue}">-</td>
+                        <td style="padding:12px 14px; text-align:center; border-bottom:1px solid #f1f5f9;">
+                            <span th:if="${r.stockStatus == 'OK'}"
+                                  style="background:#d1fae5; color:#059669; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">OK</span>
+                            <span th:if="${r.stockStatus == 'LOW'}"
+                                  style="background:#fef3c7; color:#d97706; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">LOW</span>
+                            <span th:if="${r.stockStatus == 'OUT'}"
+                                  style="background:#fee2e2; color:#dc2626; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">OUT</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${rows.isEmpty()}">
+                        <td colspan="8" style="padding:48px; text-align:center; color:#9ca3af; font-size:14px;">
+                            <i class="bi bi-inbox" style="font-size:32px; display:block; margin-bottom:8px;"></i>
+                            No active products found.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- STAFF PERFORMANCE TABLE -->
+            <table th:if="${reportType == 'staff_performance'}" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f8fafc;">
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">#</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">Staff Name</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Bills Generated</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Items Sold</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Total Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r, stat : ${rows}" th:style="${stat.odd ? 'background:#fff;' : 'background:#f8fafc;'}">
+                        <td style="padding:12px 14px; font-size:13px; color:#9ca3af; border-bottom:1px solid #f1f5f9;" th:text="${stat.count}">1</td>
+                        <td style="padding:12px 14px; font-size:13px; font-weight:600; color:#111827; border-bottom:1px solid #f1f5f9;" th:text="${r.staffName}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; text-align:right; color:#374151; border-bottom:1px solid #f1f5f9;" th:text="${r.billCount}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; text-align:right; color:#374151; border-bottom:1px solid #f1f5f9;" th:text="${r.itemsSold}">-</td>
+                        <td style="padding:12px 14px; font-size:14px; font-weight:700; color:#059669; text-align:right; border-bottom:1px solid #f1f5f9;" th:text="'₹' + ${r.totalRevenue}">-</td>
+                    </tr>
+                    <tr th:if="${rows.isEmpty()}">
+                        <td colspan="5" style="padding:48px; text-align:center; color:#9ca3af; font-size:14px;">
+                            <i class="bi bi-inbox" style="font-size:32px; display:block; margin-bottom:8px;"></i> No data found.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- CATEGORY-WISE TABLE -->
+            <table th:if="${reportType == 'category_summary'}" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f8fafc;">
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;">#</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0;"
+                            th:text="${categoryId != null ? 'Product Name' : 'Category Name'}">Category Name</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Quantity Sold</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">Total Revenue</th>
+                        <th style="padding:12px 14px; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; text-align:right;">GST Collected</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r, stat : ${rows}" th:style="${stat.odd ? 'background:#fff;' : 'background:#f8fafc;'}">
+                        <td style="padding:12px 14px; font-size:13px; color:#9ca3af; border-bottom:1px solid #f1f5f9;" th:text="${stat.count}">1</td>
+                        <td style="padding:12px 14px; font-size:13px; font-weight:600; color:#111827; border-bottom:1px solid #f1f5f9;" th:text="${r.categoryName}">-</td>
+                        <td style="padding:12px 14px; font-size:13px; text-align:right; color:#374151; border-bottom:1px solid #f1f5f9;" th:text="${r.quantitySold}">-</td>
+                        <td style="padding:12px 14px; font-size:14px; font-weight:700; color:#059669; text-align:right; border-bottom:1px solid #f1f5f9;" th:text="'₹' + ${r.totalRevenue}">-</td>
+                        <td style="padding:12px 14px; font-size:14px; font-weight:700; color:#f59e0b; text-align:right; border-bottom:1px solid #f1f5f9;" th:text="'₹' + ${r.gstCollected}">-</td>
+                    </tr>
+                    <tr th:if="${rows.isEmpty()}">
+                        <td colspan="5" style="padding:48px; text-align:center; color:#9ca3af; font-size:14px;">
+                            <i class="bi bi-inbox" style="font-size:32px; display:block; margin-bottom:8px;"></i> No data found.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <!-- ── EMPTY STATE (no report generated yet) ────────────────────────── -->
+    <div th:if="${rows == null}"
+         style="background:#fff; border-radius:16px; padding:80px 24px; text-align:center;
+                box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+        <i class="bi bi-file-earmark-bar-graph" style="font-size:56px; color:#cbd5e1;"></i>
+        <div style="font-size:18px; font-weight:700; color:#374151; margin-top:16px;">No Report Generated</div>
+        <div style="font-size:14px; color:#9ca3af; margin-top:6px;">
+            Select a report type and date range above, then click <strong>Generate</strong>.
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function toggleFilters() {
+        const type = document.getElementById('reportTypeSelect').value;
+        const dateWrappers = ['startDateWrap', 'endDateWrap', 'quickRangeWrap'];
+        const staffWrap    = document.getElementById('staffWrap');
+        const categoryWrap = document.getElementById('categoryWrap');
+
+        if (type === 'inventory') {
+            dateWrappers.forEach(id => document.getElementById(id).style.display = 'none');
+            staffWrap.style.display    = 'none';
+            categoryWrap.style.display = 'none';
+        } else if (type === 'tax') {
+            dateWrappers.forEach(id => document.getElementById(id).style.display = '');
+            staffWrap.style.display    = 'none';
+            categoryWrap.style.display = 'none';
+        } else if (type === 'itemized') {
+            dateWrappers.forEach(id => document.getElementById(id).style.display = '');
+            staffWrap.style.display    = '';
+            categoryWrap.style.display = '';
+        } else if (type === 'category_summary') {
+            dateWrappers.forEach(id => document.getElementById(id).style.display = '');
+            staffWrap.style.display    = '';
+            categoryWrap.style.display = '';
+        } else if (type === 'staff_performance') {
+            dateWrappers.forEach(id => document.getElementById(id).style.display = '');
+            staffWrap.style.display    = 'none';
+            categoryWrap.style.display = '';
+        } else {
+            // sales
+            dateWrappers.forEach(id => document.getElementById(id).style.display = '');
+            staffWrap.style.display    = '';
+            categoryWrap.style.display = 'none';
+        }
+    }
+
+    function applyQuickRange() {
+        const range = document.getElementById('quickRangeSelect').value;
+        const startInput = document.getElementById('startDateInput');
+        const endInput = document.getElementById('endDateInput');
+        
+        if (range === 'custom') return;
+        
+        const today = new Date();
+        let start = new Date();
+        let end = new Date();
+        
+        if (range === 'today') {
+            // keep today
+        } else if (range === 'yesterday') {
+            start.setDate(today.getDate() - 1);
+            end.setDate(today.getDate() - 1);
+        } else if (range === 'this_week') {
+            const first = today.getDate() - today.getDay(); // Sunday
+            start.setDate(first);
+        } else if (range === 'this_month') {
+            start = new Date(today.getFullYear(), today.getMonth(), 1);
+        } else if (range === 'last_month') {
+            start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            end = new Date(today.getFullYear(), today.getMonth(), 0);
+        } else if (range === 'this_year') {
+            start = new Date(today.getFullYear(), 0, 1);
+        } else if (range === 'all_time') {
+            start = new Date(2000, 0, 1);
+        }
+        
+        // Format as YYYY-MM-DD local time correctly
+        const formatDt = (d) => {
+            const yr = d.getFullYear();
+            const mo = String(d.getMonth() + 1).padStart(2, '0');
+            const da = String(d.getDate()).padStart(2, '0');
+            return `${yr}-${mo}-${da}`;
+        };
+        
+        startInput.value = formatDt(start);
+        endInput.value = formatDt(end);
+    }
+
+    // Run on page load to restore correct state
+    document.addEventListener('DOMContentLoaded', toggleFilters);
+</script>
+</th:block>
+</html>

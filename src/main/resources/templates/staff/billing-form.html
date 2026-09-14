@@ -1,402 +1,305 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>Create Bill | Inventory System</title>
-
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
-  <style>
-    body {
-        margin: 0;
-        background-color: #f5f7fb;
-        font-family: "Segoe UI", Roboto, sans-serif;
-    }
-
-    /* Top bar */
-    .topbar {
-        background-color: #1f2937;
-        color: #ffffff;
-        padding: 14px 22px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .topbar-title {
-        font-size: 16px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }
-
-    /* Page container */
-    .page-container {
-        padding: 25px;
-        max-width: 1200px;
-        margin: auto;
-    }
-
-    /* Header */
-    .page-header {
-        margin-bottom: 25px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .page-title {
-        font-size: 24px;
-        font-weight: 700;
-        color: #212529;
-        margin-bottom: 4px;
-    }
-
-    .page-subtitle {
-        font-size: 14px;
-        color: #6c757d;
-    }
-
-    /* Professional Form Boxes */
-    .form-box {
-        background: #ffffff;
-        border-radius: 4px;
-        padding: 24px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        border: 1px solid #e5e7eb;
-        margin-bottom: 25px;
-        border-top: 4px solid #6c757d;
-    }
-
-    .box-blue { border-top-color: #0d6efd; }
-    .box-purple { border-top-color: #6f42c1; }
-
-    /* Section title */
-    .section-title {
-        font-size: 15px;
-        font-weight: 700;
-        margin-bottom: 20px;
-        color: #495057;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 1px solid #e9ecef;
-        padding-bottom: 10px;
-    }
-
-    /* Form Inputs */
-    .form-label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #495057;
-    }
-
-    .form-control {
-        border-radius: 4px;
-        font-size: 14px;
-        border: 1px solid #ced4da;
-        box-shadow: none;
-        transition: border-color 0.2s;
-    }
-    
-    .form-control:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
-    }
-
-    /* Table */
-    .table-responsive {
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-    }
-
-    table {
-        margin-bottom: 0 !important;
-    }
-
-    table th,
-    table td {
-        vertical-align: middle;
-        font-size: 14px;
-    }
-
-    table th {
-        background-color: #f8f9fa;
-        font-weight: 600;
-        color: #495057;
-        border-bottom: 2px solid #dee2e6;
-    }
-
-    /* Quantity input */
-    .qty-input {
-        max-width: 100px;
-        text-align: center;
-    }
-
-    /* Footer actions */
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 15px;
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #dee2e6;
-    }
-    
-    .btn {
-        border-radius: 4px;
-        font-weight: 600;
-        padding: 8px 20px;
-        letter-spacing: 0.3px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Create Bill | Inventory System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f3f4f6;
+            --text-main: #111827;
+            --border-color: #e5e7eb;
+        }
+        body { margin: 0; background-color: var(--bg-color); font-family: 'Inter', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .topbar { background-color: #1f2937; color: #ffffff; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10; }
+        .topbar-title { font-size: 16px; font-weight: 600; }
+        
+        .pos-container { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Left Pane - Products */
+        .products-pane { flex: 6; background: #fff; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
+        .products-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; }
+        .products-grid { padding: 20px; overflow-y: auto; flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; align-content: start; }
+        
+        .product-card { border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.2s; position: relative; user-select: none; }
+        .product-card:hover { border-color: var(--primary-color); box-shadow: 0 4px 6px rgba(37,99,235,0.1); transform: translateY(-2px); }
+        .product-card.out-of-stock { opacity: 0.5; cursor: not-allowed; }
+        .product-title { font-weight: 600; font-size: 14px; color: var(--text-main); margin-bottom: 5px; line-height: 1.3; }
+        .product-category { font-size: 11px; color: #6b7280; text-transform: uppercase; margin-bottom: 8px; }
+        .product-price { font-weight: 700; color: #10b981; font-size: 15px; }
+        .product-stock { font-size: 12px; color: #6b7280; margin-top: 5px; }
+        
+        /* Right Pane - Cart */
+        .cart-pane { flex: 4; background: #fff; display: flex; flex-direction: column; max-width: 450px; }
+        .customer-section { padding: 15px 20px; border-bottom: 1px solid var(--border-color); background: #f8f9fa; }
+        .cart-items { flex: 1; overflow-y: auto; padding: 0; }
+        
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid #f3f4f6; }
+        .cart-item-info { flex: 1; }
+        .cart-item-title { font-weight: 600; font-size: 14px; color: var(--text-main); }
+        .cart-item-price { font-size: 13px; color: #6b7280; }
+        
+        .cart-controls { display: flex; align-items: center; gap: 10px; }
+        .qty-btn { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main); transition: 0.1s; }
+        .qty-btn:hover { background: #f3f4f6; }
+        .qty-display { width: 30px; text-align: center; font-weight: 600; font-size: 14px; }
+        .remove-btn { color: #ef4444; cursor: pointer; padding: 5px; font-size: 16px; margin-left: 5px; opacity: 0.7; }
+        .remove-btn:hover { opacity: 1; }
+        
+        .cart-summary { padding: 20px; border-top: 1px solid var(--border-color); background: #f8f9fa; }
+        .summary-row { display: flex; justify-content: space-between; font-size: 14px; color: #6b7280; margin-bottom: 8px; }
+        .summary-row.total { font-size: 18px; font-weight: 700; color: var(--text-main); margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color); }
+        
+        .checkout-btn { width: 100%; padding: 12px; font-size: 16px; font-weight: 600; border-radius: 6px; margin-top: 15px; }
+        
+        .empty-cart { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 14px; }
+        .empty-cart i { font-size: 48px; margin-bottom: 10px; opacity: 0.5; }
+    </style>
 </head>
-
 <body>
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <div class="topbar-title">Inventory Billing System</div>
-  <form th:action="@{/logout}" method="post" class="m-0">
-    <button class="btn btn-outline-light btn-sm" style="border-radius: 4px;">
-      <i class="bi bi-box-arrow-right"></i> Logout
-    </button>
-  </form>
+  <div class="topbar-title" th:text="${globalSettings != null ? globalSettings.storeName : 'Inventory Billing System'}">Inventory Billing System</div>
+  <div class="d-flex gap-3 align-items-center">
+    <a th:href="@{/staff/dashboard}" class="btn btn-outline-light btn-sm" style="border-radius: 4px; border-color: rgba(255,255,255,0.2);">
+      <i class="bi bi-arrow-left"></i> Dashboard
+    </a>
+    <form th:action="@{/logout}" method="post" class="m-0">
+      <button class="btn btn-outline-light btn-sm" style="border-radius: 4px; border-color: rgba(255,255,255,0.2);">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </button>
+    </form>
+  </div>
 </div>
 
-<div class="page-container">
+<form id="billingForm" th:action="@{/staff/billing/save}" method="post" class="pos-container">
 
-  <!-- HEADER -->
-  <div class="page-header">
-    <div>
-      <div class="page-title">Create New Bill</div>
-      <div class="page-subtitle">
-        Point of Sale <i class="bi bi-chevron-right" style="font-size: 10px;"></i> Generate customer invoice
+  <!-- LEFT PANE: PRODUCTS -->
+  <div class="products-pane">
+    <div class="products-header">
+      <div class="input-group input-group-sm" style="width: 300px;">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="text" id="productSearch" class="form-control" placeholder="Search products...">
       </div>
+      <select id="categoryFilter" class="form-select form-select-sm" style="width: 200px;">
+        <option value="all">All Categories</option>
+        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+      </select>
     </div>
-    <a th:href="@{/staff/dashboard}" class="btn btn-outline-secondary btn-sm">
-      <i class="bi bi-arrow-left"></i> Back to Dashboard
-    </a>
+    <div class="products-grid" id="productsGrid">
+      <!-- Products loaded via JS -->
+    </div>
   </div>
 
-  <form id="billingForm" th:action="@{/staff/billing/save}" method="post">
-
-    <!-- CUSTOMER DETAILS -->
-    <div class="form-box box-blue">
-      <div class="section-title"><i class="bi bi-person-badge me-2"></i>Customer Details</div>
-
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Phone Number <span class="text-danger">*</span></label>
-          <input type="tel"
-                 name="phone"
-                 id="customerPhone"
-                 class="form-control"
-                 placeholder="Enter 10-digit phone number"
-                 maxlength="15"
-                 required>
-          <div id="phoneHelp" class="form-text" style="font-size: 11px; color: #10b981; display: none;">
-            <i class="bi bi-check-circle-fill"></i> Customer found!
-          </div>
+  <!-- RIGHT PANE: CART -->
+  <div class="cart-pane">
+    <div class="customer-section">
+      <h6 style="font-size: 13px; text-transform: uppercase; color: #6b7280; font-weight: 700; margin-bottom: 10px;">Customer Details</h6>
+      <div class="row g-2">
+        <div class="col-12">
+          <input type="tel" name="phone" id="customerPhone" class="form-control form-control-sm" placeholder="Phone Number (10 digits)" pattern="\d{10}" required>
+          <div id="phoneHelp" class="form-text" style="font-size: 11px; color: #10b981; display: none; margin-top: 2px;"><i class="bi bi-check-circle-fill"></i> Found</div>
         </div>
-
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Customer Name <span class="text-danger">*</span></label>
-          <input type="text"
-                 name="customerName"
-                 id="customerName"
-                 class="form-control"
-                 placeholder="Enter full customer name"
-                 required>
+        <div class="col-12">
+          <input type="text" name="customerName" id="customerName" class="form-control form-control-sm" placeholder="Customer Name" required>
         </div>
       </div>
     </div>
-
-    <!-- PRODUCT SELECTION -->
-    <div class="form-box box-purple">
-      <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-        <div class="section-title border-bottom-0 mb-0 pb-0" style="font-size: 16px;">
-          <i class="bi bi-cart-plus me-2 text-purple" style="color: #6f42c1;"></i>Add Products
-        </div>
-        
-        <!-- Filters (Search & Category) -->
-        <div class="d-flex gap-3">
-          <!-- Premium Search Bar -->
-          <div class="input-group input-group-sm" style="width: 250px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-radius: 6px;">
-            <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 6px 0 0 6px;">
-              <i class="bi bi-search"></i>
-            </span>
-            <input type="text" id="productSearch" class="form-control border-start-0 ps-0 shadow-none" 
-                   placeholder="Search products..." style="border-radius: 0 6px 6px 0;">
-          </div>
-
-          <!-- Category Filter -->
-          <select id="categoryFilter" class="form-select form-select-sm shadow-none" 
-                  style="width: 200px; box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important; border-radius: 6px;">
-            <option value="all">All Categories</option>
-            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
-          </select>
-        </div>
-      </div>
-
-      <div class="table-responsive">
-        <table class="table table-hover table-sm border-0" id="productTable">
-          <thead>
-          <tr>
-            <th style="width: 60px; text-align: center;">S.No</th>
-            <th>Product Name</th>
-            <th style="width: 150px; text-align: center;">Quantity</th>
-          </tr>
-          </thead>
-          <tbody id="productTableBody">
-            <!-- Populated by JavaScript -->
-          </tbody>
-        </table>
-      </div>
-      
-      <!-- Hidden container for cart submission -->
-      <div id="cartHiddenInputs"></div>
-
-      <!-- ACTIONS -->
-      <div class="form-actions">
-        <button type="reset" class="btn btn-light border" onclick="cart.clear(); loadProducts('all');">
-          <i class="bi bi-x-circle me-1"></i> Clear Form
-        </button>
-        <button type="button" class="btn btn-success px-4" onclick="submitBill()">
-          <i class="bi bi-check-circle me-1"></i> Generate Bill
-        </button>
-      </div>
-    </div>
-
-  </form>
-
-</div>
-
-<script>
-    // Memory map to store selected items when switching categories
-    // Key: productId, Value: { name, quantity }
-    const cart = new Map(); 
     
+    <div class="cart-items" id="cartItems">
+      <div class="empty-cart">
+        <i class="bi bi-cart-x"></i>
+        <div>Your cart is empty.<br>Select products to add them to the bill.</div>
+      </div>
+    </div>
+    
+    <div class="cart-summary">
+      <div class="summary-row"><span>Subtotal</span><span id="subtotalDisplay">₹0.00</span></div>
+      <div class="summary-row"><span>GST (<span id="gstRateDisplay">18</span>%)</span><span id="gstDisplay">₹0.00</span></div>
+      <div class="summary-row total"><span>Grand Total</span><span id="totalDisplay">₹0.00</span></div>
+      
+      <div id="cartHiddenInputs"></div>
+      
+      <button type="button" class="btn btn-success checkout-btn" onclick="submitBill()">
+        <i class="bi bi-check-circle me-1"></i> Generate Bill
+      </button>
+    </div>
+  </div>
+
+</form>
+
+<script th:inline="javascript">
+    const GST_RATE = /*[[${globalSettings != null ? globalSettings.gstRate : 0.18}]]*/ 0.18;
+    document.getElementById('gstRateDisplay').textContent = (GST_RATE * 100).toFixed(0);
+
+    const cart = new Map(); 
+    let allProducts = [];
+
     document.addEventListener("DOMContentLoaded", () => {
-        // Load products on initial render
         loadProducts('all');
     });
 
-    // Listen for category changes
-    document.getElementById("categoryFilter").addEventListener("change", function(e) {
-        loadProducts(e.target.value);
-        // Clear search when switching categories
-        document.getElementById("productSearch").value = "";
-    });
+    document.getElementById("categoryFilter").addEventListener("change", e => loadProducts(e.target.value));
+    document.getElementById("productSearch").addEventListener("input", filterProducts);
 
-    // Customer Auto-fill Logic
     document.getElementById("customerPhone").addEventListener("input", function(e) {
         const phone = e.target.value;
         const nameInput = document.getElementById("customerName");
         const helpText = document.getElementById("phoneHelp");
         
-        // Trigger search when phone number is at least 10 digits
         if (phone.length >= 10) {
-            fetch(`/api/customers/phone/${phone}`)
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
-                    throw new Error('Not found');
-                })
+            fetch('/api/customers/phone/' + phone)
+                .then(res => res.ok ? res.json() : Promise.reject())
                 .then(data => {
                     nameInput.value = data.name;
                     nameInput.readOnly = true;
-                    nameInput.classList.add('bg-light');
+                    nameInput.style.backgroundColor = '#f3f4f6';
                     helpText.style.display = 'block';
                 })
                 .catch(() => {
-                    // Not found in DB - make editable for new customer
                     if (nameInput.readOnly) {
                         nameInput.value = "";
                         nameInput.readOnly = false;
-                        nameInput.classList.remove('bg-light');
+                        nameInput.style.backgroundColor = '';
                         helpText.style.display = 'none';
                     }
                 });
-        } else {
-            // Reset if user deletes digits
-            if (nameInput.readOnly) {
-                nameInput.value = "";
-                nameInput.readOnly = false;
-                nameInput.classList.remove('bg-light');
-                helpText.style.display = 'none';
-            }
         }
-    });
-
-    // Premium live search filter
-    document.getElementById("productSearch").addEventListener("input", function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const rows = document.querySelectorAll("#productTableBody tr");
-        
-        rows.forEach(row => {
-            const productName = row.cells[1].textContent.toLowerCase();
-            if (productName.includes(searchTerm)) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
-        });
     });
 
     function loadProducts(categoryId) {
         let url = categoryId === 'all' ? '/api/products/active' : `/api/products/category/${categoryId}`;
-        
         fetch(url)
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
-                const tbody = document.getElementById("productTableBody");
-                tbody.innerHTML = ''; // Clear table
-                
-                data.forEach((product, index) => {
-                    const pId = product.id || product.Id || product.ID;
-                    // Check if this product is already in our cart memory
-                    const savedQty = cart.has(pId) ? cart.get(pId).quantity : '';
-                    
-                    const row = `
-                        <tr>
-                            <td style="text-align: center; color: #6c757d; font-weight: 500;">${index + 1}</td>
-                            <td style="font-weight: 500;">${product.name}</td>
-                            <td style="text-align: center;">
-                                <input type="number" min="0" class="form-control form-control-sm qty-input mx-auto" 
-                                       placeholder="0" value="${savedQty}" 
-                                       onchange="updateCart(${pId}, '${product.name}', this.value)">
-                            </td>
-                        </tr>
-                    `;
-                    tbody.insertAdjacentHTML('beforeend', row);
-                });
-            })
-            .catch(error => console.error('Error fetching products:', error));
+                allProducts = data;
+                renderProducts(allProducts);
+            });
     }
 
-    // Save quantity to memory when cashier types a number
-    function updateCart(productId, productName, quantityStr) {
-        const qty = parseInt(quantityStr);
-        if (qty > 0) {
-            cart.set(productId, { name: productName, quantity: qty });
+    function filterProducts() {
+        const term = document.getElementById("productSearch").value.toLowerCase();
+        const filtered = allProducts.filter(p => p.name.toLowerCase().includes(term));
+        renderProducts(filtered);
+    }
+
+    function renderProducts(products) {
+        const grid = document.getElementById("productsGrid");
+        grid.innerHTML = '';
+        
+        products.forEach(p => {
+            const id = p.id || p.Id || p.ID;
+            const isOutOfStock = p.quantity <= 0;
+            const price = parseFloat(p.price || 0).toFixed(2);
+            
+            const card = document.createElement('div');
+            card.className = `product-card ${isOutOfStock ? 'out-of-stock' : ''}`;
+            if (!isOutOfStock) {
+                card.onclick = () => addToCart(id, p.name, price, p.quantity);
+            }
+            
+            card.innerHTML = `
+                <div class="product-category">${p.category ? p.category.name : 'Product'}</div>
+                <div class="product-title">${p.name}</div>
+                <div class="d-flex justify-content-between align-items-end mt-3">
+                    <div class="product-price">₹${price}</div>
+                    <div class="product-stock ${isOutOfStock ? 'text-danger fw-bold' : ''}">${isOutOfStock ? 'Out of Stock' : p.quantity + ' left'}</div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function addToCart(id, name, price, maxQty) {
+        if (cart.has(id)) {
+            const item = cart.get(id);
+            if (item.qty < maxQty) {
+                item.qty++;
+                renderCart();
+            } else {
+                alert("Cannot exceed available stock!");
+            }
         } else {
-            cart.delete(productId);
+            cart.set(id, { name, price: parseFloat(price), qty: 1, maxQty });
+            renderCart();
         }
     }
 
-    // Prepare hidden inputs and submit form
+    function updateQty(id, delta) {
+        if (cart.has(id)) {
+            const item = cart.get(id);
+            const newQty = item.qty + delta;
+            if (newQty > 0 && newQty <= item.maxQty) {
+                item.qty = newQty;
+            } else if (newQty > item.maxQty) {
+                alert("Cannot exceed available stock!");
+            } else if (newQty <= 0) {
+                cart.delete(id);
+            }
+            renderCart();
+        }
+    }
+
+    function removeFromCart(id) {
+        cart.delete(id);
+        renderCart();
+    }
+
+    function renderCart() {
+        const container = document.getElementById("cartItems");
+        if (cart.size === 0) {
+            container.innerHTML = `<div class="empty-cart"><i class="bi bi-cart-x"></i><div>Your cart is empty.<br>Select products to add them to the bill.</div></div>`;
+            updateTotals(0);
+            return;
+        }
+
+        container.innerHTML = '';
+        let subtotal = 0;
+
+        cart.forEach((item, id) => {
+            const itemTotal = item.price * item.qty;
+            subtotal += itemTotal;
+            
+            const row = document.createElement('div');
+            row.className = 'cart-item';
+            row.innerHTML = `
+                <div class="cart-item-info">
+                    <div class="cart-item-title">${item.name}</div>
+                    <div class="cart-item-price">₹${item.price.toFixed(2)}</div>
+                </div>
+                <div class="cart-controls">
+                    <button type="button" class="qty-btn" onclick="updateQty(${id}, -1)">-</button>
+                    <div class="qty-display">${item.qty}</div>
+                    <button type="button" class="qty-btn" onclick="updateQty(${id}, 1)">+</button>
+                    <i class="bi bi-trash remove-btn" onclick="removeFromCart(${id})"></i>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+
+        updateTotals(subtotal);
+    }
+
+    function updateTotals(subtotal) {
+        const gst = subtotal * GST_RATE;
+        const total = subtotal + gst;
+        
+        document.getElementById('subtotalDisplay').textContent = '₹' + subtotal.toFixed(2);
+        document.getElementById('gstDisplay').textContent = '₹' + gst.toFixed(2);
+        document.getElementById('totalDisplay').textContent = '₹' + total.toFixed(2);
+    }
+
     function submitBill() {
         const form = document.getElementById("billingForm");
-        
-        // Trigger browser's built-in required field validation
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
         }
-
         if(cart.size === 0) {
             alert("Please add at least one product to the bill.");
             return;
@@ -404,20 +307,15 @@
 
         const hiddenContainer = document.getElementById("cartHiddenInputs");
         let htmlStr = "";
-        
         let index = 0;
-        cart.forEach((value, productId) => {
-            htmlStr += `<input type="hidden" name="items[${index}].productId" value="${productId}">`;
-            htmlStr += `<input type="hidden" name="items[${index}].quantity" value="${value.quantity}">`;
+        cart.forEach((item, id) => {
+            htmlStr += `<input type="hidden" name="items[${index}].productId" value="${id}">`;
+            htmlStr += `<input type="hidden" name="items[${index}].quantity" value="${item.qty}">`;
             index++;
         });
-        
         hiddenContainer.innerHTML = htmlStr;
-
-        // Submit the parent form
         form.submit();
     }
 </script>
-
 </body>
 </html>

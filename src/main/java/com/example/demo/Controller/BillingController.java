@@ -27,6 +27,7 @@ public class BillingController {
     private final BillingService billingService;
     private final UserService userService;
     private final com.example.demo.Service.interfaces.CategoryService categoryService;
+    private final com.example.demo.Service.interfaces.SettingsService settingsService;
 
     @GetMapping
     public String billingForm(Model model){
@@ -79,6 +80,7 @@ public class BillingController {
 
     model.addAttribute("bill",bill);
     model.addAttribute("items",bill.getItems());
+    model.addAttribute("settings", settingsService.getSettings());
 
     return "staff/bill-reciept";
     }

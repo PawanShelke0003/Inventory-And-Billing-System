@@ -36,11 +36,17 @@
 
                 <div class="col-md-6">
                     <label class="form-label">Password</label>
-                    <input type="password"
-                           name="password"
-                           class="form-control"
-                           placeholder="Enter secure password"
-                           th:required="${user.id == null}">
+                    <div style="position: relative;">
+                        <input type="password"
+                               id="userPassword"
+                               name="password"
+                               class="form-control"
+                               placeholder="Enter secure password"
+                               minlength="6"
+                               style="padding-right: 40px;"
+                               th:required="${user.id == null}">
+                        <i class="bi bi-eye-slash" style="position: absolute; right: 12px; top: 10px; cursor: pointer; color: #6b7280;" onclick="togglePasswordVisibility('userPassword', this)"></i>
+                    </div>
                     <div class="form-text">
                         <span th:if="${user.id == null}">Minimum 8 characters recommended</span>
                         <span th:unless="${user.id == null}">Leave blank to keep existing password</span>
@@ -83,6 +89,21 @@
         </form>
 
     </div>
+    
+    <script>
+        function togglePasswordVisibility(inputId, icon) {
+            var input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+            } else {
+                input.type = "password";
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
+            }
+        }
+    </script>
 </div>
 </body>
 </html>

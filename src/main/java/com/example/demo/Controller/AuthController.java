@@ -17,7 +17,7 @@ public class AuthController {
     if(auth.getAuthorities().stream()
             .anyMatch(a->
                     a.getAuthority().equals("ROLE_OWNER"))){
-        return "redirect:/owner/dashboard";
+        return "redirect:/admin/dashboard";
     }
 
         if(auth.getAuthorities().stream()

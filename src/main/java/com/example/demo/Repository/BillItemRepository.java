@@ -61,4 +61,19 @@ public interface BillItemRepository extends JpaRepository<BillItem, Long> {
             @Param("staffId") Long staffId,
             @Param("categoryId") Long categoryId
     );
+    @Query("SELECT new com.example.demo.DTO.ItemizedReportRow(" +
+           "bi.bill.id, bi.bill.billDate, bi.bill.createdBy.username, " +
+           "bi.product.name, bi.product.category.name, " +
+           "bi.quantity, bi.price, bi.total) " +
+           "FROM BillItem bi " +
+           "WHERE bi.bill.billDate >= :start AND bi.bill.billDate <= :end " +
+           "AND (:staffId IS NULL OR bi.bill.createdBy.id = :staffId) " +
+           "AND (:categoryId IS NULL OR bi.product.category.id = :categoryId) " +
+           "ORDER BY bi.bill.billDate DESC, bi.bill.id ASC")
+    List<com.example.demo.DTO.ItemizedReportRow> findItemizedReport(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("staffId") Long staffId,
+            @Param("categoryId") Long categoryId
+    );
 }

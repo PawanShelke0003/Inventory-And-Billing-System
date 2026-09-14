@@ -21,6 +21,7 @@ public class AdminDashBoardController {
     private final BillingService billingService;
     private final ProductService productService;
     private final UserService userService;
+    private final com.example.demo.Service.interfaces.SettingsService settingsService;
 
     @GetMapping("/dashboard")
     public String adminDashboard(Model model){
@@ -44,6 +45,7 @@ public class AdminDashBoardController {
 
         model.addAttribute("bill",bill);
         model.addAttribute("items",bill.getItems());
+        model.addAttribute("settings", settingsService.getSettings());
 
         return "admin/bill-view";
     }

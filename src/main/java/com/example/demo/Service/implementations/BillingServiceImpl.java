@@ -5,6 +5,7 @@ import com.example.demo.Repository.BillItemRepository;
 import com.example.demo.Repository.BillRepository;
 import com.example.demo.Repository.ProductRepository;
 import com.example.demo.Service.interfaces.BillingService;
+import com.example.demo.Service.interfaces.SettingsService;
 import com.example.demo.exception.BusinessException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,7 @@ public class BillingServiceImpl implements BillingService {
     private final BillRepository billRepo;
     private final BillItemRepository billItemRepo;
     private final ProductRepository productRepo;
-
-    private static final BigDecimal GST_RATE = new BigDecimal("0.18");
+    private final SettingsService settingsService;
 
     @Override
     public Bill createBill(Customer customer, User staff, List<BillItem> items) {
@@ -49,7 +49,8 @@ public class BillingServiceImpl implements BillingService {
 
         }
 
-        BigDecimal gstAmount = totalAmount.multiply(GST_RATE).
+        BigDecimal gstRate = BigDecimal.valueOf(settingsService.getSettings().getGstRate());
+        BigDecimal gstAmount = totalAmount.multiply(gstRate).
                 setScale(2, RoundingMode.HALF_UP);
         BigDecimal grandTotal = totalAmount.add(gstAmount);
 

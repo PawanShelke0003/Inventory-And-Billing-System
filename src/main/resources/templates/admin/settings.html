@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: admin_layout('Settings', ~{::content})}" th:with="activeMenu='settings'">
+<head>
+    <title>Settings Hub</title>
+</head>
+<body>
+
+<div th:fragment="content">
+    <style>
+        .tabs { display: flex; gap: 24px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px; }
+        .tab { padding: 12px 0; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+        .form-group input[type="text"], .form-group input[type="number"], .form-group input[type="password"], .form-group textarea {
+            width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; transition: all 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        
+        .staff-table { width: 100%; border-collapse: collapse; }
+        .staff-table th { text-align: left; padding: 12px; font-size: 12px; color: #64748b; border-bottom: 1px solid #e2e8f0; background: none; }
+        .staff-table td { padding: 12px; font-size: 14px; border-bottom: 1px solid #e2e8f0; }
+    </style>
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Settings Hub</h1>
+            <p class="page-subtitle">Manage store details, staff access, and security</p>
+        </div>
+    </div>
+
+    <div th:if="${param.success != null}" style="padding: 12px; background: #d1fae5; color: #065f46; border-radius: 8px; margin-bottom: 24px;">
+        Settings saved successfully!
+    </div>
+    <div th:if="${param.error != null}" style="padding: 12px; background: #fee2e2; color: #b91c1c; border-radius: 8px; margin-bottom: 24px;" th:text="${param.error}">
+        Error saving settings.
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('store', this)">Store Details</div>
+        <div class="tab" onclick="switchTab('profile', this)">My Profile</div>
+    </div>
+
+    <!-- STORE SETTINGS TAB -->
+    <div id="store" class="tab-content active">
+        <form th:action="@{/admin/settings/store}" method="post" class="card">
+            <input type="hidden" name="id" th:value="${settings.id}">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div class="form-group">
+                    <label>Store Name</label>
+                    <input type="text" name="storeName" th:value="${settings.storeName}" required>
+                </div>
+                <div class="form-group">
+                    <label>GSTIN / Tax ID</label>
+                    <input type="text" name="gstin" th:value="${settings.gstin}" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" th:value="${settings.phone}" pattern="\d{10}" title="Phone number must be exactly 10 digits" required>
+                </div>
+                <div class="form-group">
+                    <label>Default GST Rate (Decimal, e.g. 0.18 for 18%)</label>
+                    <input type="number" step="0.01" min="0" max="1" name="gstRate" th:value="${settings.gstRate}" required>
+                </div>
+                <div class="form-group">
+                    <label>Invoice Prefix</label>
+                    <input type="text" name="invoicePrefix" th:value="${settings.invoicePrefix}" required>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Store Address</label>
+                <textarea name="address" rows="2" required th:text="${settings.address}"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Receipt Footer Note</label>
+                <textarea name="receiptFooter" rows="2" required th:text="${settings.receiptFooter}"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Store Settings</button>
+        </form>
+    </div>
+
+    <!-- PROFILE TAB -->
+    <div id="profile" class="tab-content">
+        <form th:action="@{/admin/settings/profile}" method="post" class="card" style="max-width:500px;">
+            <h3 style="margin-top:0; margin-bottom:16px;">Change My Credentials</h3>
+            <div class="form-group">
+                <label>Username (Display Name)</label>
+                <input type="text" name="newUsername" th:value="${currentUsername}" required>
+            </div>
+            <div class="form-group">
+                <label>Current Password</label>
+                <div style="position: relative;">
+                    <input type="password" id="oldPassword" name="oldPassword" required style="padding-right: 40px;">
+                    <i class="bi bi-eye-slash" style="position: absolute; right: 12px; top: 10px; cursor: pointer; color: #6b7280;" onclick="togglePasswordVisibility('oldPassword', this)"></i>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>New Password</label>
+                <div style="position: relative;">
+                    <input type="password" id="newPassword" name="newPassword" minlength="6" required style="padding-right: 40px;">
+                    <i class="bi bi-eye-slash" style="position: absolute; right: 12px; top: 10px; cursor: pointer; color: #6b7280;" onclick="togglePasswordVisibility('newPassword', this)"></i>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Profile & Log Out</button>
+        </form>
+    </div>
+
+    <script>
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            el.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function togglePasswordVisibility(inputId, icon) {
+            var input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+            } else {
+                input.type = "password";
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

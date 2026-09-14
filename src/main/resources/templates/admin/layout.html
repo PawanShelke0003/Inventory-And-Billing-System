@@ -412,7 +412,7 @@
 <div class="sidebar" id="sidebar">
     <div class="sidebar-brand">
         <i class="bi bi-box-fill"></i>
-        <span class="brand-text">InventorySys</span>
+        <span class="brand-text" th:text="${globalSettings != null ? globalSettings.storeName : 'InventorySys'}">InventorySys</span>
     </div>
 
     <!-- SCROLLABLE NAV AREA -->
@@ -451,6 +451,16 @@
             <li>
                 <a th:href="@{/admin/analytics}" th:classappend="${activeMenu == 'analytics' ? 'active' : ''}">
                     <i class="bi bi-bar-chart-line"></i> <span class="link-text">Analytics</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/reports}" th:classappend="${activeMenu == 'reports' ? 'active' : ''}">
+                    <i class="bi bi-file-earmark-bar-graph"></i> <span class="link-text">Reports</span>
+                </a>
+            </li>
+            <li sec:authorize="hasAnyRole('ROLE_OWNER', 'ROLE_MANAGER')">
+                <a th:href="@{/admin/settings}" th:classappend="${activeMenu == 'settings' ? 'active' : ''}">
+                    <i class="bi bi-gear"></i> <span class="link-text">Settings</span>
                 </a>
             </li>
         </ul>
